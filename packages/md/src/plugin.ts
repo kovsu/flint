@@ -15,6 +15,7 @@ import linkContents from "./rules/linkContents.ts";
 import linkFragments from "./rules/linkFragments.ts";
 import mediaSyntaxReversals from "./rules/mediaSyntaxReversals.ts";
 import referenceLikeUrls from "./rules/referenceLikeUrls.ts";
+import tableColumnCounts from "./rules/tableColumnCounts.ts";
 
 export const md = createPlugin({
 	files: {
@@ -36,6 +37,7 @@ export const md = createPlugin({
 		linkContents,
 		linkFragments,
 		mediaSyntaxReversals,
+		tableColumnCounts,
 		referenceLikeUrls,
 	],
 });

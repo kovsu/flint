@@ -3644,7 +3644,8 @@
 		"flint": {
 			"name": "tableColumnCounts",
 			"plugin": "md",
-			"preset": "logical"
+			"preset": "logical",
+			"status": "implemented"
 		},
 		"markdownlint": [
 			{

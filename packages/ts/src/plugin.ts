@@ -86,6 +86,7 @@ import generatorFunctionYields from "./rules/generatorFunctionYields.ts";
 import globalAssignments from "./rules/globalAssignments.ts";
 import globalObjectCalls from "./rules/globalObjectCalls.ts";
 import impliedEvals from "./rules/impliedEvals.ts";
+import instanceOfArrays from "./rules/instanceOfArrays.ts";
 import isNaNComparisons from "./rules/isNaNComparisons.ts";
 import multilineAmbiguities from "./rules/multilineAmbiguities.ts";
 import namespaceDeclarations from "./rules/namespaceDeclarations.ts";
@@ -212,6 +213,7 @@ export const ts = createPlugin({
 		globalAssignments,
 		globalObjectCalls,
 		impliedEvals,
+		instanceOfArrays,
 		isNaNComparisons,
 		multilineAmbiguities,
 		namespaceDeclarations,

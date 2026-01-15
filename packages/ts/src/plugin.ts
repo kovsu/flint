@@ -86,6 +86,7 @@ import errorSubclassProperties from "./rules/errorSubclassProperties.ts";
 import errorUnnecessaryCaptureStackTraces from "./rules/errorUnnecessaryCaptureStackTraces.ts";
 import evolvingVariableTypes from "./rules/evolvingVariableTypes.ts";
 import exceptionAssignments from "./rules/exceptionAssignments.ts";
+import exportMutables from "./rules/exportMutables.ts";
 import fetchMethodBodies from "./rules/fetchMethodBodies.ts";
 import finallyStatementSafety from "./rules/finallyStatementSafety.ts";
 import forDirections from "./rules/forDirections.ts";
@@ -234,6 +235,7 @@ export const ts = createPlugin({
 		errorUnnecessaryCaptureStackTraces,
 		evolvingVariableTypes,
 		exceptionAssignments,
+		exportMutables,
 		fetchMethodBodies,
 		finallyStatementSafety,
 		forDirections,

@@ -84,6 +84,7 @@ import equalityOperatorNegations from "./rules/equalityOperatorNegations.ts";
 import errorMessages from "./rules/errorMessages.ts";
 import errorSubclassProperties from "./rules/errorSubclassProperties.ts";
 import errorUnnecessaryCaptureStackTraces from "./rules/errorUnnecessaryCaptureStackTraces.ts";
+import evals from "./rules/evals.ts";
 import evolvingVariableTypes from "./rules/evolvingVariableTypes.ts";
 import exceptionAssignments from "./rules/exceptionAssignments.ts";
 import exportMutables from "./rules/exportMutables.ts";
@@ -234,6 +235,7 @@ export const ts = createPlugin({
 		errorMessages,
 		errorSubclassProperties,
 		errorUnnecessaryCaptureStackTraces,
+		evals,
 		evolvingVariableTypes,
 		exceptionAssignments,
 		exportMutables,

@@ -103,6 +103,7 @@ import importTypeSideEffects from "./rules/importTypeSideEffects.ts";
 import instanceOfArrays from "./rules/instanceOfArrays.ts";
 import isNaNComparisons from "./rules/isNaNComparisons.ts";
 import mathMethods from "./rules/mathMethods.ts";
+import meaninglessVoidOperators from "./rules/meaninglessVoidOperators.ts";
 import misleadingVoidExpressions from "./rules/misleadingVoidExpressions.ts";
 import moduleSpecifierLists from "./rules/moduleSpecifierLists.ts";
 import multilineAmbiguities from "./rules/multilineAmbiguities.ts";
@@ -247,6 +248,7 @@ export const ts = createPlugin({
 		instanceOfArrays,
 		isNaNComparisons,
 		mathMethods,
+		meaninglessVoidOperators,
 		misleadingVoidExpressions,
 		moduleSpecifierLists,
 		multilineAmbiguities,

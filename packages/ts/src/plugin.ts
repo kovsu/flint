@@ -71,6 +71,7 @@ import emptyDestructures from "./rules/emptyDestructures.ts";
 import emptyEnums from "./rules/emptyEnums.ts";
 import emptyFiles from "./rules/emptyFiles.ts";
 import emptyFunctions from "./rules/emptyFunctions.ts";
+import emptyModuleAttributes from "./rules/emptyModuleAttributes.ts";
 import emptyStaticBlocks from "./rules/emptyStaticBlocks.ts";
 import enumInitializers from "./rules/enumInitializers.ts";
 import enumMemberLiterals from "./rules/enumMemberLiterals.ts";
@@ -208,6 +209,7 @@ export const ts = createPlugin({
 		emptyEnums,
 		emptyFiles,
 		emptyFunctions,
+		emptyModuleAttributes,
 		emptyStaticBlocks,
 		enumInitializers,
 		enumMemberLiterals,

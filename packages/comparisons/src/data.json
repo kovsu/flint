@@ -9658,7 +9658,8 @@
 		"flint": {
 			"name": "emptyModuleAttributes",
 			"plugin": "ts",
-			"preset": "stylistic"
+			"preset": "stylistic",
+			"status": "implemented"
 		}
 	},
 	{

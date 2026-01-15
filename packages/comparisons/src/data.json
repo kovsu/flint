@@ -9801,7 +9801,9 @@
 		"flint": {
 			"name": "enumMemberLiterals",
 			"plugin": "ts",
-			"preset": "logical"
+			"preset": "logical",
+			"strictness": "strict",
+			"status": "implemented"
 		},
 		"oxlint": [
 			{

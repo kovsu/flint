@@ -92,6 +92,7 @@ import explicitAnys from "./rules/explicitAnys.ts";
 import exponentiationOperators from "./rules/exponentiationOperators.ts";
 import exportMutables from "./rules/exportMutables.ts";
 import exportUniqueNames from "./rules/exportUniqueNames.ts";
+import extraneousClasses from "./rules/extraneousClasses.ts";
 import fetchMethodBodies from "./rules/fetchMethodBodies.ts";
 import finallyStatementSafety from "./rules/finallyStatementSafety.ts";
 import forDirections from "./rules/forDirections.ts";
@@ -250,6 +251,7 @@ export const ts = createPlugin({
 		exponentiationOperators,
 		exportMutables,
 		exportUniqueNames,
+		extraneousClasses,
 		fetchMethodBodies,
 		finallyStatementSafety,
 		forDirections,

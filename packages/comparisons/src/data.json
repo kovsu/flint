@@ -12278,7 +12278,8 @@
 		"flint": {
 			"name": "literalConstructorWrappers",
 			"plugin": "ts",
-			"preset": "stylistic"
+			"preset": "stylistic",
+			"status": "implemented"
 		},
 		"notes": "Will apply to all literals, not just bigint"
 	},

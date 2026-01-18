@@ -113,6 +113,7 @@ import importEmptyBlocks from "./rules/importEmptyBlocks.ts";
 import importTypeSideEffects from "./rules/importTypeSideEffects.ts";
 import instanceOfArrays from "./rules/instanceOfArrays.ts";
 import isNaNComparisons from "./rules/isNaNComparisons.ts";
+import literalConstructorWrappers from "./rules/literalConstructorWrappers.ts";
 import mathMethods from "./rules/mathMethods.ts";
 import meaninglessVoidOperators from "./rules/meaninglessVoidOperators.ts";
 import misleadingVoidExpressions from "./rules/misleadingVoidExpressions.ts";
@@ -269,6 +270,7 @@ export const ts = createPlugin({
 		importTypeSideEffects,
 		instanceOfArrays,
 		isNaNComparisons,
+		literalConstructorWrappers,
 		mathMethods,
 		meaninglessVoidOperators,
 		misleadingVoidExpressions,

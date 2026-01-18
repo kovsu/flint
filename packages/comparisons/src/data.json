@@ -10681,9 +10681,10 @@
 			}
 		],
 		"flint": {
-			"name": "genericConstructorCalls",
+			"name": "constructorGenericCalls",
 			"plugin": "ts",
-			"preset": "stylistic"
+			"preset": "stylistic",
+			"status": "implemented"
 		},
 		"oxlint": [
 			{

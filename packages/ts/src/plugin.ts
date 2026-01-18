@@ -1,5 +1,7 @@
 import { createPlugin } from "@flint.fyi/core";
 
+import accessorPairGroups from "./rules/accessorPairGroups.ts";
+import accessorPairTypes from "./rules/accessorPairTypes.ts";
 import accessorThisRecursion from "./rules/accessorThisRecursion.ts";
 import anyArguments from "./rules/anyArguments.ts";
 import anyAssignments from "./rules/anyAssignments.ts";
@@ -107,7 +109,6 @@ import functionNameMatches from "./rules/functionNameMatches.ts";
 import functionNewCalls from "./rules/functionNewCalls.ts";
 import generatorFunctionYields from "./rules/generatorFunctionYields.ts";
 import getterReturns from "./rules/getterReturns.ts";
-import getterSetterPairedTypes from "./rules/getterSetterPairedTypes.ts";
 import globalAssignments from "./rules/globalAssignments.ts";
 import globalObjectCalls from "./rules/globalObjectCalls.ts";
 import globalThisAliases from "./rules/globalThisAliases.ts";
@@ -161,6 +162,8 @@ export const ts = createPlugin({
 	},
 	name: "TypeScript",
 	rules: [
+		accessorPairGroups,
+		accessorPairTypes,
 		accessorThisRecursion,
 		anyArguments,
 		anyAssignments,
@@ -268,7 +271,6 @@ export const ts = createPlugin({
 		functionNewCalls,
 		generatorFunctionYields,
 		getterReturns,
-		getterSetterPairedTypes,
 		globalAssignments,
 		globalObjectCalls,
 		globalThisAliases,

@@ -1,7 +1,7 @@
 import type { AST, Checker } from "@flint.fyi/typescript-language";
 import { SyntaxKind } from "typescript";
 
-export function isCallExpression(
+function isCallExpression(
 	node: AST.CallExpression,
 	typeChecker: Checker,
 	leftType: string,

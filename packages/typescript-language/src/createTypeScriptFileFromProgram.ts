@@ -55,10 +55,14 @@ export function createTypeScriptFileFromProgram(
 			const fileServices = { options, program, sourceFile, typeChecker };
 
 			const visit = (node: ts.Node) => {
+				const visitorName = NodeSyntaxKinds[node.kind];
 				// @ts-expect-error - This should work...?
 				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
-				visitors[NodeSyntaxKinds[node.kind]]?.(node, fileServices);
+				visitors[visitorName]?.(node, fileServices);
 				node.forEachChild(visit);
+				// @ts-expect-error - This should work...?
+				// eslint-disable-next-line @typescript-eslint/no-unsafe-call
+				visitors[`${visitorName}:exit`]?.(node, fileServices);
 			};
 
 			visit(sourceFile);

@@ -5,6 +5,10 @@ import {
 } from "@flint.fyi/typescript-language";
 import { SyntaxKind } from "typescript";
 
+import {
+	isContextReportCall,
+	isCreateRuleCall,
+} from "../utils/checkCallExpression.ts";
 import { ruleCreator } from "./ruleCreator.ts";
 
 export default ruleCreator.createRule(typescriptLanguage, {
@@ -190,36 +194,17 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		return {
 			visitors: {
 				CallExpression(node, { sourceFile, typeChecker }) {
-					if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
-						return;
-					}
-
-					const propertyAccess = node.expression;
-
-					const type = typeChecker.getTypeAtLocation(propertyAccess.expression);
-					const typeName = type.getSymbol()?.getName();
-
-					// TODO: Maybe need to check it more strictly
-					// https://github.com/flint-fyi/flint/issues/152
-					if (
-						typeName === "RuleCreator" &&
-						propertyAccess.name.text === "createRule"
-					) {
+					if (isCreateRuleCall(node, typeChecker)) {
 						checkMessageInCreateRule(node);
 						return;
 					}
 
-					// TODO: Maybe need to check it more strictly
-					// https://github.com/flint-fyi/flint/issues/152
-					if (
-						typeName === "RuleContext" &&
-						propertyAccess.name.text === "report"
-					) {
+					if (isContextReportCall(node, typeChecker)) {
 						populateMessageInCreateRule(node, sourceFile);
 						return;
 					}
 				},
-				Program() {
+				"SourceFile:exit"() {
 					messagePlaceholders.clear();
 				},
 			},

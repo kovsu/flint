@@ -4,6 +4,7 @@ import getStartSourceFile from "./rules/getStartSourceFile.ts";
 import invalidCodeLines from "./rules/invalidCodeLines.ts";
 import missingPlaceholders from "./rules/missingPlaceholders.ts";
 import testCaseDuplicates from "./rules/testCaseDuplicates.ts";
+import unusedMessageIds from "./rules/unusedMessageIds.ts";
 
 export const flint = createPlugin({
 	name: "Flint",
@@ -11,6 +12,7 @@ export const flint = createPlugin({
 		getStartSourceFile,
 		invalidCodeLines,
 		testCaseDuplicates,
+		unusedMessageIds,
 		missingPlaceholders,
 	],
 });

@@ -87,6 +87,7 @@ export type RuleVisitor<ASTNode, FileServices extends object> = (
 	services: FileServices,
 ) => void;
 
+// TODO: Support `:exit` visitors
 export type RuleVisitors<AstNodesByName, FileServices extends object> = {
 	[Kind in keyof AstNodesByName]?: RuleVisitor<
 		AstNodesByName[Kind],

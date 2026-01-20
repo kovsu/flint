@@ -1,5 +1,5 @@
-import type { AST } from "@flint.fyi/typescript-language";
-import ts, { SyntaxKind } from "typescript";
+import type { AST, Checker } from "@flint.fyi/typescript-language";
+import { SyntaxKind } from "typescript";
 
 interface MessageStringVisitorContext {
 	isInArray: boolean;
@@ -94,11 +94,11 @@ export function getStringOriginalQuote(
 	return text[0] ?? '"';
 }
 
-// TODO: Maybe need to check it more strictly
-// https://github.com/flint-fyi/flint/issues/152
-export function isRuleCreatorCreateRule(
+function isCallExpression(
 	node: AST.CallExpression,
-	typeChecker: ts.TypeChecker,
+	typeChecker: Checker,
+	leftType: string,
+	rightCall: string,
 ): boolean {
 	if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
 		return false;
@@ -108,24 +108,17 @@ export function isRuleCreatorCreateRule(
 	const type = typeChecker.getTypeAtLocation(propertyAccess.expression);
 	const typeName = type.getSymbol()?.getName();
 
-	return (
-		typeName === "RuleCreator" && propertyAccess.name.text === "createRule"
-	);
+	// TODO: Maybe need to check it more strictly
+	// https://github.com/flint-fyi/flint/issues/152
+	return typeName === leftType && propertyAccess.name.text === rightCall;
 }
 
-// TODO: Maybe need to check it more strictly
-// https://github.com/flint-fyi/flint/issues/152
-export function isRuleContextReport(
+export const isRuleCreatorCreateRule = (
 	node: AST.CallExpression,
-	typeChecker: ts.TypeChecker,
-): boolean {
-	if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
-		return false;
-	}
+	typeChecker: Checker,
+) => isCallExpression(node, typeChecker, "RuleCreator", "createRule");
 
-	const propertyAccess = node.expression;
-	const type = typeChecker.getTypeAtLocation(propertyAccess.expression);
-	const typeName = type.getSymbol()?.getName();
-
-	return typeName === "RuleContext" && propertyAccess.name.text === "report";
-}
+export const isRuleContextReport = (
+	node: AST.CallExpression,
+	typeChecker: Checker,
+) => isCallExpression(node, typeChecker, "RuleContext", "report");

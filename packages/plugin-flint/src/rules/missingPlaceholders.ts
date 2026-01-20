@@ -164,7 +164,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 						return;
 					}
 				},
-				SourceFile() {
+				"SourceFile:exit"() {
 					messagePlaceholders.clear();
 				},
 			},

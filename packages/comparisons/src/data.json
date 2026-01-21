@@ -13362,6 +13362,7 @@
 			"name": "nonNullAssertions",
 			"plugin": "ts",
 			"preset": "logical",
+			"status": "implemented",
 			"strictness": "strict"
 		},
 		"oxlint": [

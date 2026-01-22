@@ -161,6 +161,7 @@ import objectSpreadUnnecessaryFallbacks from "./rules/objectSpreadUnnecessaryFal
 import objectTypeDefinitions from "./rules/objectTypeDefinitions.ts";
 import octalEscapes from "./rules/octalEscapes.ts";
 import octalNumbers from "./rules/octalNumbers.ts";
+import operatorAssignmentShorthand from "./rules/operatorAssignmentShorthand.ts";
 import parameterReassignments from "./rules/parameterReassignments.ts";
 import parseIntRadixes from "./rules/parseIntRadixes.ts";
 import propertyAccessNotation from "./rules/propertyAccessNotation.ts";
@@ -352,6 +353,7 @@ export const ts = createPlugin({
 		objectTypeDefinitions,
 		octalEscapes,
 		octalNumbers,
+		operatorAssignmentShorthand,
 		parameterReassignments,
 		parseIntRadixes,
 		propertyAccessNotation,

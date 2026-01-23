@@ -170,6 +170,7 @@ import recursionOnlyArguments from "./rules/recursionOnlyArguments.ts";
 import reduceTypeParameters from "./rules/reduceTypeParameters.ts";
 import regexCharacterClasses from "./rules/regexCharacterClasses.ts";
 import regexCharacterClassRanges from "./rules/regexCharacterClassRanges.ts";
+import regexControlCharacterEscapes from "./rules/regexControlCharacterEscapes.ts";
 import regexDigitMatchers from "./rules/regexDigitMatchers.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
@@ -367,6 +368,7 @@ export const ts = createPlugin({
 		reduceTypeParameters,
 		regexCharacterClasses,
 		regexCharacterClassRanges,
+		regexControlCharacterEscapes,
 		regexDigitMatchers,
 		returnAssignments,
 		selfAssignments,

@@ -169,6 +169,7 @@ import propertyAccessNotation from "./rules/propertyAccessNotation.ts";
 import recursionOnlyArguments from "./rules/recursionOnlyArguments.ts";
 import reduceTypeParameters from "./rules/reduceTypeParameters.ts";
 import regexCharacterClasses from "./rules/regexCharacterClasses.ts";
+import regexDigitMatchers from "./rules/regexDigitMatchers.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
 import selfComparisons from "./rules/selfComparisons.ts";
@@ -364,6 +365,7 @@ export const ts = createPlugin({
 		recursionOnlyArguments,
 		reduceTypeParameters,
 		regexCharacterClasses,
+		regexDigitMatchers,
 		returnAssignments,
 		selfAssignments,
 		selfComparisons,

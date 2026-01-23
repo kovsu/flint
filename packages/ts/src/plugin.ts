@@ -185,6 +185,7 @@ import regexEmptyAlternatives from "./rules/regexEmptyAlternatives.ts";
 import regexEmptyCapturingGroups from "./rules/regexEmptyCapturingGroups.ts";
 import regexEmptyGroups from "./rules/regexEmptyGroups.ts";
 import regexEmptyLazyQuantifiers from "./rules/regexEmptyLazyQuantifiers.ts";
+import regexEmptyLookaroundsAssertions from "./rules/regexEmptyLookaroundsAssertions.ts";
 import regexExecutors from "./rules/regexExecutors.ts";
 import regexGraphemeStringLiterals from "./rules/regexGraphemeStringLiterals.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
@@ -398,6 +399,7 @@ export const ts = createPlugin({
 		regexEmptyCapturingGroups,
 		regexEmptyGroups,
 		regexEmptyLazyQuantifiers,
+		regexEmptyLookaroundsAssertions,
 		regexExecutors,
 		regexGraphemeStringLiterals,
 		returnAssignments,

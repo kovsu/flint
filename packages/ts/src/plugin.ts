@@ -183,6 +183,7 @@ import regexDollarEscapes from "./rules/regexDollarEscapes.ts";
 import regexDuplicateCharacterClassCharacters from "./rules/regexDuplicateCharacterClassCharacters.ts";
 import regexEmptyAlternatives from "./rules/regexEmptyAlternatives.ts";
 import regexEmptyCapturingGroups from "./rules/regexEmptyCapturingGroups.ts";
+import regexEmptyCharacterClasses from "./rules/regexEmptyCharacterClasses.ts";
 import regexEmptyGroups from "./rules/regexEmptyGroups.ts";
 import regexEmptyLazyQuantifiers from "./rules/regexEmptyLazyQuantifiers.ts";
 import regexEmptyLookaroundsAssertions from "./rules/regexEmptyLookaroundsAssertions.ts";
@@ -394,6 +395,7 @@ export const ts = createPlugin({
 		regexControlCharacterEscapes,
 		regexControlCharacters,
 		regexDigitMatchers,
+		regexEmptyCharacterClasses,
 		regexDollarEscapes,
 		regexDuplicateCharacterClassCharacters,
 		regexEmptyAlternatives,

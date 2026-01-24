@@ -15321,7 +15321,8 @@
 		"flint": {
 			"name": "regexNonStandardFlags",
 			"plugin": "ts",
-			"preset": "logical"
+			"preset": "logical",
+			"status": "implemented"
 		}
 	},
 	{

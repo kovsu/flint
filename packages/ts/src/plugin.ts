@@ -198,6 +198,7 @@ import regexLetterCasing from "./rules/regexLetterCasing.ts";
 import regexLookaroundQuantifierOptimizations from "./rules/regexLookaroundQuantifierOptimizations.ts";
 import regexMatchNotation from "./rules/regexMatchNotation.ts";
 import regexNamedReplacements from "./rules/regexNamedReplacements.ts";
+import regexNonStandardFlags from "./rules/regexNonStandardFlags.ts";
 import regexOctalEscapes from "./rules/regexOctalEscapes.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
@@ -423,6 +424,8 @@ export const ts = createPlugin({
 		regexLookaroundQuantifierOptimizations,
 		regexMatchNotation,
 		regexNamedReplacements,
+		regexNamedReplacements,
+		regexNonStandardFlags,
 		regexOctalEscapes,
 		returnAssignments,
 		selfAssignments,

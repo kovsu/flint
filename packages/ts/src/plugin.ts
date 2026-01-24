@@ -200,6 +200,7 @@ import regexMatchNotation from "./rules/regexMatchNotation.ts";
 import regexNamedReplacements from "./rules/regexNamedReplacements.ts";
 import regexNonStandardFlags from "./rules/regexNonStandardFlags.ts";
 import regexOctalEscapes from "./rules/regexOctalEscapes.ts";
+import regexStarQuantifiers from "./rules/regexStarQuantifiers.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
 import selfComparisons from "./rules/selfComparisons.ts";
@@ -427,6 +428,7 @@ export const ts = createPlugin({
 		regexNamedReplacements,
 		regexNonStandardFlags,
 		regexOctalEscapes,
+		regexStarQuantifiers,
 		returnAssignments,
 		selfAssignments,
 		selfComparisons,

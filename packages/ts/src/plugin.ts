@@ -201,6 +201,7 @@ import regexMisleadingCapturingGroups from "./rules/regexMisleadingCapturingGrou
 import regexMisleadingQuantifiers from "./rules/regexMisleadingQuantifiers.ts";
 import regexMisleadingUnicodeCharacters from "./rules/regexMisleadingUnicodeCharacters.ts";
 import regexNamedBackreferences from "./rules/regexNamedBackreferences.ts";
+import regexNamedCaptureGroups from "./rules/regexNamedCaptureGroups.ts";
 import regexNamedReplacements from "./rules/regexNamedReplacements.ts";
 import regexNonStandardFlags from "./rules/regexNonStandardFlags.ts";
 import regexObscureRanges from "./rules/regexObscureRanges.ts";
@@ -440,6 +441,7 @@ export const ts = createPlugin({
 		regexMisleadingQuantifiers,
 		regexMisleadingUnicodeCharacters,
 		regexNamedBackreferences,
+		regexNamedCaptureGroups,
 		regexNamedReplacements,
 		regexNonStandardFlags,
 		regexObscureRanges,

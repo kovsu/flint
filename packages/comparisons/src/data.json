@@ -15299,7 +15299,8 @@
 		"flint": {
 			"name": "regexNamedCaptureGroups",
 			"plugin": "ts",
-			"preset": "logical"
+			"preset": "logical",
+			"status": "implemented"
 		}
 	},
 	{

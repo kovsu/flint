@@ -197,6 +197,7 @@ import regexInvisibleCharacters from "./rules/regexInvisibleCharacters.ts";
 import regexLetterCasing from "./rules/regexLetterCasing.ts";
 import regexLookaroundQuantifierOptimizations from "./rules/regexLookaroundQuantifierOptimizations.ts";
 import regexMatchNotation from "./rules/regexMatchNotation.ts";
+import regexMisleadingCapturingGroups from "./rules/regexMisleadingCapturingGroups.ts";
 import regexMisleadingUnicodeCharacters from "./rules/regexMisleadingUnicodeCharacters.ts";
 import regexNamedReplacements from "./rules/regexNamedReplacements.ts";
 import regexNonStandardFlags from "./rules/regexNonStandardFlags.ts";
@@ -427,6 +428,7 @@ export const ts = createPlugin({
 		regexLetterCasing,
 		regexLookaroundQuantifierOptimizations,
 		regexMatchNotation,
+		regexMisleadingCapturingGroups,
 		regexMisleadingUnicodeCharacters,
 		regexNamedReplacements,
 		regexNamedReplacements,

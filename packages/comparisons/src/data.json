@@ -15228,7 +15228,8 @@
 		"flint": {
 			"name": "regexMisleadingCapturingGroups",
 			"plugin": "ts",
-			"preset": "logical"
+			"preset": "logical",
+			"status": "implemented"
 		}
 	},
 	{

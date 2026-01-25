@@ -199,6 +199,7 @@ import regexLookaroundQuantifierOptimizations from "./rules/regexLookaroundQuant
 import regexMatchNotation from "./rules/regexMatchNotation.ts";
 import regexMisleadingCapturingGroups from "./rules/regexMisleadingCapturingGroups.ts";
 import regexMisleadingUnicodeCharacters from "./rules/regexMisleadingUnicodeCharacters.ts";
+import regexNamedBackreferences from "./rules/regexNamedBackreferences.ts";
 import regexNamedReplacements from "./rules/regexNamedReplacements.ts";
 import regexNonStandardFlags from "./rules/regexNonStandardFlags.ts";
 import regexObscureRanges from "./rules/regexObscureRanges.ts";
@@ -432,6 +433,7 @@ export const ts = createPlugin({
 		regexMatchNotation,
 		regexMisleadingCapturingGroups,
 		regexMisleadingUnicodeCharacters,
+		regexNamedBackreferences,
 		regexNamedReplacements,
 		regexNonStandardFlags,
 		regexObscureRanges,

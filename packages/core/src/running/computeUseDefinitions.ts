@@ -9,7 +9,7 @@ import type {
 	ProcessedConfigDefinition,
 } from "../types/configs.ts";
 import { flatten } from "../utils/arrays.ts";
-import { readGitignore } from "./readGitignore.ts";
+import { gitignoreFilter } from "./createGitignoreFilter.ts";
 import { resolveUseFilesGlobs } from "./resolveUseFilesGlobs.ts";
 
 const log = debugForFile(import.meta.filename);
@@ -30,9 +30,6 @@ export async function computeUseDefinitions(
 	log("Collecting files from %d use pattern(s)", configDefinition.use.length);
 
 	const allFilePaths = new Set<string>();
-	const gitignore = await readGitignore();
-
-	log("Excluding based on .gitignore: %s", gitignore);
 
 	const useDefinitions = await Promise.all(
 		configDefinition.use.map(async (use) => {
@@ -40,18 +37,15 @@ export async function computeUseDefinitions(
 			const foundFilePaths = (
 				await Array.fromAsync(
 					fs.glob([globs.include].flat(), {
-						exclude: [...gitignore, ...globs.exclude],
+						exclude: globs.exclude,
 						withFileTypes: true,
 					}),
 				)
 			)
 				.filter((entry) => entry.isFile())
-				.map((entry) =>
-					path.relative(
-						process.cwd(),
-						makeAbsolute(path.join(entry.parentPath, entry.name)),
-					),
-				);
+				.map((entry) => makeAbsolute(path.join(entry.parentPath, entry.name)))
+				.filter(gitignoreFilter)
+				.map((filePath) => path.relative(process.cwd(), filePath));
 
 			for (const foundFilePath of foundFilePaths) {
 				allFilePaths.add(foundFilePath);

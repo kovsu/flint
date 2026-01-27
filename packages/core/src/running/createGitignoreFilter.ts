@@ -3,7 +3,7 @@ import ignore from "ignore";
 import fs from "node:fs";
 import path from "node:path";
 
-export function createGitignoreFilter() {
+function createGitignoreFilter() {
 	const ig = ignore();
 	const visited = new Set();
 	const rootDir = process.cwd();

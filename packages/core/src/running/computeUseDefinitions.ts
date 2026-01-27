@@ -42,10 +42,18 @@ export async function computeUseDefinitions(
 					}),
 				)
 			)
-				.filter((entry) => entry.isFile())
-				.map((entry) => makeAbsolute(path.join(entry.parentPath, entry.name)))
-				.filter(gitignoreFilter)
-				.map((filePath) => path.relative(process.cwd(), filePath));
+				.map((entry) =>
+					entry.isFile()
+						? path.relative(
+								process.cwd(),
+								makeAbsolute(path.join(entry.parentPath, entry.name)),
+							)
+						: null,
+				)
+				.filter(
+					(filePath): filePath is string =>
+						filePath !== null && gitignoreFilter(filePath),
+				);
 
 			for (const foundFilePath of foundFilePaths) {
 				allFilePaths.add(foundFilePath);

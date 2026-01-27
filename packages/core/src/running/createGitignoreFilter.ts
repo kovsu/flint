@@ -1,3 +1,4 @@
+import { makeAbsolute } from "@flint.fyi/utils";
 import ignore from "ignore";
 import fs from "node:fs";
 import path from "node:path";
@@ -45,8 +46,8 @@ export function createGitignoreFilter() {
 		ig.add(rules);
 	}
 
-	return (filePath: string): boolean => {
-		loadDir(path.dirname(filePath));
+	return (filePath: string) => {
+		loadDir(path.dirname(makeAbsolute(filePath)));
 		return !ig.ignores(path.relative(rootDir, filePath));
 	};
 }

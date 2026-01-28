@@ -35,15 +35,16 @@ export function createGitignoreFilter() {
 			.filter((line) => line && !line.startsWith("#"))
 			.map((rule) => {
 				const negated = rule.startsWith("!");
-				const pattern = negated ? rule.slice(1) : rule;
+				const [negatePrefix, pattern] = negated
+					? ["!", rule.slice(1)]
+					: ["", rule];
 
 				if (pattern.startsWith("/")) {
-					const relativePath = prefix ? `${prefix}${pattern}` : pattern;
-					return negated ? `!${relativePath}` : relativePath;
+					return `${negatePrefix}${prefix}${pattern}`;
 				}
 
 				if (prefix) {
-					return negated ? `!${prefix}/${pattern}` : `${prefix}/${pattern}`;
+					return `${negatePrefix}${prefix}/**/${pattern}`;
 				}
 
 				return rule;

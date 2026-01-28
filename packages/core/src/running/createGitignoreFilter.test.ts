@@ -96,6 +96,32 @@ describe("createGitignoreFilter", () => {
 	});
 
 	// root/
+	// └── src/
+	//     ├── .gitignore       (dist)
+	//     ├── dist/
+	//     │   └── bundle.js    ❌ ignored
+	//     └── nested/
+	//         └── dist/
+	//             └── bundle.js ❌ ignored
+	it("handles unanchored pattern in nested .gitignore (should match any depth)", () => {
+		const srcDir = path.join(integrationRoot, "src");
+		fs.mkdirSync(srcDir, { recursive: true });
+		fs.writeFileSync(path.join(srcDir, ".gitignore"), "dist");
+
+		const srcDist = path.join(srcDir, "dist", "bundle.js");
+		const nestedDist = path.join(srcDir, "nested", "dist", "bundle.js");
+
+		fs.mkdirSync(path.dirname(srcDist), { recursive: true });
+		fs.writeFileSync(srcDist, "bundle");
+		fs.mkdirSync(path.dirname(nestedDist), { recursive: true });
+		fs.writeFileSync(nestedDist, "nested bundle");
+
+		const gitignoreFilter = createGitignoreFilter();
+		expect(gitignoreFilter(srcDist)).toBe(false);
+		expect(gitignoreFilter(nestedDist)).toBe(false);
+	});
+
+	// root/
 	// ├── .gitignore         (/build)
 	// ├── build/
 	// │   └── output.js      ❌ ignored (root /build)

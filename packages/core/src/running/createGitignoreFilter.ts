@@ -3,7 +3,7 @@ import ignore from "ignore";
 import fs from "node:fs";
 import path from "node:path";
 
-function createGitignoreFilter() {
+export function createGitignoreFilter() {
 	const ig = ignore();
 	const visited = new Set();
 	const rootDir = process.cwd();
@@ -34,13 +34,19 @@ function createGitignoreFilter() {
 			.map((line) => line.trim())
 			.filter((line) => line && !line.startsWith("#"))
 			.map((rule) => {
-				if (!prefix) {
-					return rule;
-				}
-
 				const negated = rule.startsWith("!");
 				const pattern = negated ? rule.slice(1) : rule;
-				return negated ? `!${prefix}/${pattern}` : `${prefix}/${rule}`;
+
+				if (pattern.startsWith("/")) {
+					const relativePath = prefix ? `${prefix}${pattern}` : pattern;
+					return negated ? `!${relativePath}` : relativePath;
+				}
+
+				if (prefix) {
+					return negated ? `!${prefix}/${pattern}` : `${prefix}/${pattern}`;
+				}
+
+				return rule;
 			});
 
 		ig.add(rules);

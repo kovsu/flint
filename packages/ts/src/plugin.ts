@@ -227,7 +227,6 @@ import regexUnnecessaryDisjunctions from "./rules/regexUnnecessaryDisjunctions.t
 import regexUnnecessaryDollarReplacements from "./rules/regexUnnecessaryDollarReplacements.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
-import selfComparisons from "./rules/selfComparisons.ts";
 import sequences from "./rules/sequences.ts";
 import shadowedRestrictedNames from "./rules/shadowedRestrictedNames.ts";
 import sparseArrays from "./rules/sparseArrays.ts";
@@ -238,6 +237,7 @@ import undefinedVariables from "./rules/undefinedVariables.ts";
 import unicodeBOMs from "./rules/unicodeBOMs.ts";
 import unnecessaryBlocks from "./rules/unnecessaryBlocks.ts";
 import unnecessaryCatches from "./rules/unnecessaryCatches.ts";
+import unnecessaryComparisons from "./rules/unnecessaryComparisons.ts";
 import unnecessaryConcatenation from "./rules/unnecessaryConcatenation.ts";
 import unsafeNegations from "./rules/unsafeNegations.ts";
 import variableDeletions from "./rules/variableDeletions.ts";
@@ -478,7 +478,6 @@ export const ts = createPlugin({
 		regexUnnecessaryDollarReplacements,
 		returnAssignments,
 		selfAssignments,
-		selfComparisons,
 		sequences,
 		shadowedRestrictedNames,
 		sparseArrays,
@@ -489,6 +488,7 @@ export const ts = createPlugin({
 		unicodeBOMs,
 		unnecessaryBlocks,
 		unnecessaryCatches,
+		unnecessaryComparisons,
 		unnecessaryConcatenation,
 		unsafeNegations,
 		variableDeletions,

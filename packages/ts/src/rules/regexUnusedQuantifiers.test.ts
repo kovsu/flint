@@ -7,80 +7,104 @@ ruleTester.describe(rule, {
 			code: `
 /a{1}/;
 `,
+			output: `
+/a/;
+`,
 			snapshot: `
 /a{1}/;
  ~~~~
- Quantifier 'a{1}' is unnecessary because it matches exactly once.
+ Quantifier \`a{1}\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 /a{1,1}/;
+`,
+			output: `
+/a/;
 `,
 			snapshot: `
 /a{1,1}/;
  ~~~~~~
- Quantifier 'a{1,1}' is unnecessary because it matches exactly once.
+ Quantifier \`a{1,1}\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 /(ab){1}/;
+`,
+			output: `
+/(ab)/;
 `,
 			snapshot: `
 /(ab){1}/;
  ~~~~~~~
- Quantifier '(ab){1}' is unnecessary because it matches exactly once.
+ Quantifier \`(ab){1}\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 /(ab){1}?/;
 `,
+			output: `
+/(ab)/;
+`,
 			snapshot: `
 /(ab){1}?/;
  ~~~~~~~~
- Quantifier '(ab){1}?' is unnecessary because it matches exactly once.
+ Quantifier \`(ab){1}?\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 /[a-z]{1}/;
 `,
+			output: `
+/[a-z]/;
+`,
 			snapshot: `
 /[a-z]{1}/;
  ~~~~~~~~
- Quantifier '[a-z]{1}' is unnecessary because it matches exactly once.
+ Quantifier \`[a-z]{1}\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 new RegExp("a{1}");
+`,
+			output: `
+new RegExp("a");
 `,
 			snapshot: `
 new RegExp("a{1}");
             ~~~~
-            Quantifier 'a{1}' is unnecessary because it matches exactly once.
+            Quantifier \`a{1}\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 RegExp("a{1,1}");
+`,
+			output: `
+RegExp("a");
 `,
 			snapshot: `
 RegExp("a{1,1}");
         ~~~~~~
-        Quantifier 'a{1,1}' is unnecessary because it matches exactly once.
+        Quantifier \`a{1,1}\` is unnecessary because it matches exactly once.
 `,
 		},
 		{
 			code: `
 /(?:ab){1}/;
 `,
+			output: `
+/(?:ab)/;
+`,
 			snapshot: `
 /(?:ab){1}/;
  ~~~~~~~~~
- Quantifier '(?:ab){1}' is unnecessary because it matches exactly once.
+ Quantifier \`(?:ab){1}\` is unnecessary because it matches exactly once.
 `,
 		},
 	],

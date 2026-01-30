@@ -20,11 +20,14 @@ export default ruleCreator.createRule(typescriptLanguage, {
 	messages: {
 		uselessQuantifier: {
 			primary:
-				"Quantifier '{{ raw }}' is unnecessary because it matches exactly once.",
+				"Quantifier `{{ raw }}` is unnecessary because it matches exactly once.",
 			secondary: [
 				"A quantifier that matches exactly once can be removed without changing the pattern's behavior.",
 			],
-			suggestions: ["Remove the quantifier."],
+			suggestions: [
+				"Remove the quantifier if one match is all that is needed.",
+				"Change the quantifier if multiple matches are intended.",
+			],
 		},
 	},
 	setup(context) {
@@ -41,9 +44,17 @@ export default ruleCreator.createRule(typescriptLanguage, {
 			visitRegExpAST(regexpAst, {
 				onQuantifierEnter(node) {
 					if (node.min === 1 && node.max === 1) {
+						const quantifierStart = node.element.end;
 						context.report({
 							data: {
 								raw: node.raw,
+							},
+							fix: {
+								range: {
+									begin: patternStart + quantifierStart,
+									end: patternStart + node.end,
+								},
+								text: "",
 							},
 							message: "uselessQuantifier",
 							range: {

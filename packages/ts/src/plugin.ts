@@ -230,6 +230,7 @@ import regexUnnecessaryCharacterRanges from "./rules/regexUnnecessaryCharacterRa
 import regexUnnecessaryDisjunctions from "./rules/regexUnnecessaryDisjunctions.ts";
 import regexUnnecessaryDollarReplacements from "./rules/regexUnnecessaryDollarReplacements.ts";
 import regexUnnecessaryEscapes from "./rules/regexUnnecessaryEscapes.ts";
+import regexUnnecessaryNonCapturingGroups from "./rules/regexUnnecessaryNonCapturingGroups.ts";
 import regexUnusedCapturingGroups from "./rules/regexUnusedCapturingGroups.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
@@ -496,6 +497,7 @@ export const ts = createPlugin({
 		regexUnnecessaryDisjunctions,
 		regexUnnecessaryDollarReplacements,
 		regexUnnecessaryEscapes,
+		regexUnnecessaryNonCapturingGroups,
 		regexUnusedCapturingGroups,
 		returnAssignments,
 		selfAssignments,

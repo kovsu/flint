@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { createDiskBackedLinterHost } from "../host/createDiskBackedLinterHost.ts";
 import { createGitignoreFilter } from "./createGitignoreFilter.ts";
 
 const INTEGRATION_DIR_NAME = ".flint-gitignore-filter-integration-tests";
@@ -46,7 +47,8 @@ describe("createGitignoreFilter", () => {
 		fs.mkdirSync(path.dirname(filePath), { recursive: true });
 		fs.writeFileSync(filePath, "content");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(filePath)).toBe(true);
 	});
 
@@ -69,7 +71,8 @@ describe("createGitignoreFilter", () => {
 		fs.mkdirSync(path.dirname(srcFile), { recursive: true });
 		fs.writeFileSync(srcFile, "source content");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(logFile)).toBe(false);
 		expect(gitignoreFilter(distFile)).toBe(false);
 		expect(gitignoreFilter(srcFile)).toBe(true);
@@ -90,7 +93,8 @@ describe("createGitignoreFilter", () => {
 		fs.writeFileSync(debugLog, "debug");
 		fs.writeFileSync(importantLog, "important");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(debugLog)).toBe(false);
 		expect(gitignoreFilter(importantLog)).toBe(true);
 	});
@@ -116,7 +120,8 @@ describe("createGitignoreFilter", () => {
 		fs.mkdirSync(path.dirname(nestedDist), { recursive: true });
 		fs.writeFileSync(nestedDist, "nested bundle");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(srcDist)).toBe(false);
 		expect(gitignoreFilter(nestedDist)).toBe(false);
 	});
@@ -143,7 +148,8 @@ describe("createGitignoreFilter", () => {
 		fs.mkdirSync(path.dirname(srcBuild), { recursive: true });
 		fs.writeFileSync(srcBuild, "src build");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(rootBuild)).toBe(false);
 		expect(gitignoreFilter(srcFile)).toBe(true);
 		expect(gitignoreFilter(srcBuild)).toBe(true);
@@ -175,7 +181,8 @@ describe("createGitignoreFilter", () => {
 		fs.writeFileSync(srcTemp, "cache");
 		fs.writeFileSync(srcFile, "source");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(rootLog)).toBe(false);
 		expect(gitignoreFilter(srcLog)).toBe(false);
 		expect(gitignoreFilter(srcTemp)).toBe(false);
@@ -201,7 +208,8 @@ describe("createGitignoreFilter", () => {
 		fs.writeFileSync(ignoredFile, "generated");
 		fs.writeFileSync(keptFile, "keep");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(ignoredFile)).toBe(false);
 		expect(gitignoreFilter(keptFile)).toBe(true);
 	});
@@ -221,7 +229,8 @@ describe("createGitignoreFilter", () => {
 		fs.writeFileSync(logFile, "log");
 		fs.writeFileSync(tsFile, "source");
 
-		const gitignoreFilter = createGitignoreFilter();
+		const host = createDiskBackedLinterHost(integrationRoot);
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(logFile)).toBe(false);
 		expect(gitignoreFilter(tsFile)).toBe(true);
 	});

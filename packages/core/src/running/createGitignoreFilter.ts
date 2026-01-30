@@ -1,12 +1,13 @@
 import { makeAbsolute } from "@flint.fyi/utils";
 import ignore from "ignore";
-import fs from "node:fs";
-import path from "node:path";
+import path from "path";
 
-export function createGitignoreFilter() {
+import type { LinterHost } from "../types/host.ts";
+
+export function createGitignoreFilter(cwd: string, host: LinterHost) {
 	const ig = ignore();
 	const visited = new Set();
-	const rootDir = process.cwd();
+	const rootDir = cwd;
 
 	function loadDir(dir: string): void {
 		if (visited.has(dir) || !dir.startsWith(rootDir)) {
@@ -20,14 +21,16 @@ export function createGitignoreFilter() {
 		visited.add(dir);
 
 		const gitignorePath = path.join(dir, ".gitignore");
-		if (!fs.existsSync(gitignorePath)) {
+		if (host.stat(gitignorePath) !== "file") {
+			return;
+		}
+
+		const content = host.readFile(gitignorePath);
+		if (content === undefined) {
 			return;
 		}
 
 		const prefix = path.relative(rootDir, dir);
-		// Should we use readFileSafe here?
-		// We should use readFileSync to avoid async operations.
-		const content = fs.readFileSync(gitignorePath, "utf-8");
 
 		const rules = content
 			.split("\n")
@@ -58,5 +61,3 @@ export function createGitignoreFilter() {
 		return !ig.ignores(path.relative(rootDir, filePath));
 	};
 }
-
-export const gitignoreFilter = createGitignoreFilter();

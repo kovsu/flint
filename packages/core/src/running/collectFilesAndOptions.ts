@@ -46,8 +46,10 @@ export async function collectFilesAndOptions(
 	ignoreCache: boolean | undefined,
 ): Promise<CollectedFilesAndOptions> {
 	// 1. Collect all file paths to lint and the 'use' rule configuration groups
-	const { allFilePaths, useDefinitions } =
-		await computeUseDefinitions(configDefinition);
+	const { allFilePaths, useDefinitions } = await computeUseDefinitions(
+		configDefinition,
+		host,
+	);
 
 	// 2. Retrieve any past cached results from those files
 	const cached = ignoreCache

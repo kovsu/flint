@@ -8,8 +8,9 @@ import type {
 	ConfigUseDefinition,
 	ProcessedConfigDefinition,
 } from "../types/configs.ts";
+import type { LinterHost } from "../types/host.ts";
 import { flatten } from "../utils/arrays.ts";
-import { gitignoreFilter } from "./createGitignoreFilter.ts";
+import { createGitignoreFilter } from "./createGitignoreFilter.ts";
 import { resolveUseFilesGlobs } from "./resolveUseFilesGlobs.ts";
 
 const log = debugForFile(import.meta.filename);
@@ -26,10 +27,12 @@ export interface ConfigUseDefinitionWithFiles extends ConfigUseDefinition {
 
 export async function computeUseDefinitions(
 	configDefinition: ProcessedConfigDefinition,
+	host: LinterHost,
 ): Promise<ComputedUseDefinitions> {
 	log("Collecting files from %d use pattern(s)", configDefinition.use.length);
 
 	const allFilePaths = new Set<string>();
+	const gitignoreFilter = createGitignoreFilter(process.cwd(), host);
 
 	const useDefinitions = await Promise.all(
 		configDefinition.use.map(async (use) => {

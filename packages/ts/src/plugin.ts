@@ -240,6 +240,7 @@ import shadowedRestrictedNames from "./rules/shadowedRestrictedNames.ts";
 import singleVariableDeclarations from "./rules/singleVariableDeclarations.ts";
 import sizeComparisonOperators from "./rules/sizeComparisonOperators.ts";
 import sparseArrays from "./rules/sparseArrays.ts";
+import staticMemberOnlyClasses from "./rules/staticMemberOnlyClasses.ts";
 import symbolDescriptions from "./rules/symbolDescriptions.ts";
 import topLevelAwaits from "./rules/topLevelAwaits.ts";
 import tripleSlashReferences from "./rules/tripleSlashReferences.ts";
@@ -505,6 +506,7 @@ export const ts = createPlugin({
 		singleVariableDeclarations,
 		sizeComparisonOperators,
 		sparseArrays,
+		staticMemberOnlyClasses,
 		symbolDescriptions,
 		topLevelAwaits,
 		tripleSlashReferences,

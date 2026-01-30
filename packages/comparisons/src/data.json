@@ -15610,7 +15610,8 @@
 		"flint": {
 			"name": "regexUnicodeProperties",
 			"plugin": "ts",
-			"preset": "stylistic"
+			"preset": "stylistic",
+			"status": "implemented"
 		}
 	},
 	{

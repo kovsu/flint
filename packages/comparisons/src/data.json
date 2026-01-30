@@ -15903,7 +15903,8 @@
 		"flint": {
 			"name": "regexUnusedQuantifiers",
 			"plugin": "ts",
-			"preset": "logical"
+			"preset": "logical",
+			"status": "implemented"
 		}
 	},
 	{

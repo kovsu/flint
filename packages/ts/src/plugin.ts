@@ -238,6 +238,7 @@ import setSizeLengthChecks from "./rules/setSizeLengthChecks.ts";
 import setterReturns from "./rules/setterReturns.ts";
 import shadowedRestrictedNames from "./rules/shadowedRestrictedNames.ts";
 import singleVariableDeclarations from "./rules/singleVariableDeclarations.ts";
+import sizeComparisonOperators from "./rules/sizeComparisonOperators.ts";
 import sparseArrays from "./rules/sparseArrays.ts";
 import symbolDescriptions from "./rules/symbolDescriptions.ts";
 import topLevelAwaits from "./rules/topLevelAwaits.ts";
@@ -501,6 +502,7 @@ export const ts = createPlugin({
 		setterReturns,
 		shadowedRestrictedNames,
 		singleVariableDeclarations,
+		sizeComparisonOperators,
 		sparseArrays,
 		symbolDescriptions,
 		topLevelAwaits,

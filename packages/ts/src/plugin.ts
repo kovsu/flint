@@ -249,6 +249,7 @@ import staticMemberOnlyClasses from "./rules/staticMemberOnlyClasses.ts";
 import stringCaseMismatches from "./rules/stringCaseMismatches.ts";
 import stringCodePoints from "./rules/stringCodePoints.ts";
 import stringSliceMethods from "./rules/stringSliceMethods.ts";
+import stringStartsEndsWith from "./rules/stringStartsEndsWith.ts";
 import symbolDescriptions from "./rules/symbolDescriptions.ts";
 import thisAliases from "./rules/thisAliases.ts";
 import thisBeforeSuper from "./rules/thisBeforeSuper.ts";
@@ -526,9 +527,10 @@ export const ts = createPlugin({
 		stringCaseMismatches,
 		stringCodePoints,
 		stringSliceMethods,
+		stringStartsEndsWith,
 		symbolDescriptions,
-		thisBeforeSuper,
 		thisAliases,
+		thisBeforeSuper,
 		topLevelAwaits,
 		tripleSlashReferences,
 		tripleSlashReferenceValidity,

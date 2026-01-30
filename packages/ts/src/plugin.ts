@@ -231,6 +231,7 @@ import regexUnnecessaryDisjunctions from "./rules/regexUnnecessaryDisjunctions.t
 import regexUnnecessaryDollarReplacements from "./rules/regexUnnecessaryDollarReplacements.ts";
 import regexUnnecessaryEscapes from "./rules/regexUnnecessaryEscapes.ts";
 import regexUnnecessaryNonCapturingGroups from "./rules/regexUnnecessaryNonCapturingGroups.ts";
+import regexUnnecessaryOptionalAssertions from "./rules/regexUnnecessaryOptionalAssertions.ts";
 import regexUnusedCapturingGroups from "./rules/regexUnusedCapturingGroups.ts";
 import regexUnusedLazyQuantifiers from "./rules/regexUnusedLazyQuantifiers.ts";
 import regexUnusedQuantifiers from "./rules/regexUnusedQuantifiers.ts";
@@ -496,6 +497,7 @@ export const ts = createPlugin({
 		regexUnicodeCodepointEscapes,
 		regexUnicodeEscapes,
 		regexUnicodeFlag,
+		regexUnnecessaryOptionalAssertions,
 		regexUnicodeProperties,
 		regexUnnecessaryAssertions,
 		regexUnnecessaryBackreferences,

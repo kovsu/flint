@@ -245,6 +245,7 @@ import staticMemberOnlyClasses from "./rules/staticMemberOnlyClasses.ts";
 import symbolDescriptions from "./rules/symbolDescriptions.ts";
 import topLevelAwaits from "./rules/topLevelAwaits.ts";
 import tripleSlashReferences from "./rules/tripleSlashReferences.ts";
+import tripleSlashReferenceValidity from "./rules/tripleSlashReferenceValidity.ts";
 import tsComments from "./rules/tsComments.ts";
 import tslintComments from "./rules/tslintComments.ts";
 import typeofComparisons from "./rules/typeofComparisons.ts";
@@ -515,6 +516,7 @@ export const ts = createPlugin({
 		tsComments,
 		tslintComments,
 		typeofComparisons,
+		tripleSlashReferenceValidity,
 		unassignedVariables,
 		undefinedVariables,
 		unicodeBOMs,

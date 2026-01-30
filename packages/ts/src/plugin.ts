@@ -242,6 +242,7 @@ import sizeComparisonOperators from "./rules/sizeComparisonOperators.ts";
 import sparseArrays from "./rules/sparseArrays.ts";
 import symbolDescriptions from "./rules/symbolDescriptions.ts";
 import topLevelAwaits from "./rules/topLevelAwaits.ts";
+import tripleSlashReferences from "./rules/tripleSlashReferences.ts";
 import tsComments from "./rules/tsComments.ts";
 import tslintComments from "./rules/tslintComments.ts";
 import typeofComparisons from "./rules/typeofComparisons.ts";
@@ -506,6 +507,7 @@ export const ts = createPlugin({
 		sparseArrays,
 		symbolDescriptions,
 		topLevelAwaits,
+		tripleSlashReferences,
 		tsComments,
 		tslintComments,
 		typeofComparisons,

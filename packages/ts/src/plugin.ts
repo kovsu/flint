@@ -240,6 +240,7 @@ import regexUnusedFlags from "./rules/regexUnusedFlags.ts";
 import regexUnusedLazyQuantifiers from "./rules/regexUnusedLazyQuantifiers.ts";
 import regexUnusedQuantifiers from "./rules/regexUnusedQuantifiers.ts";
 import regexValidity from "./rules/regexValidity.ts";
+import regexWordMatchers from "./rules/regexWordMatchers.ts";
 import returnAssignments from "./rules/returnAssignments.ts";
 import selfAssignments from "./rules/selfAssignments.ts";
 import sequences from "./rules/sequences.ts";
@@ -525,6 +526,7 @@ export const ts = createPlugin({
 		regexUnusedLazyQuantifiers,
 		regexUnusedQuantifiers,
 		regexValidity,
+		regexWordMatchers,
 		returnAssignments,
 		selfAssignments,
 		sequences,

@@ -264,6 +264,7 @@ import tripleSlashReferences from "./rules/tripleSlashReferences.ts";
 import tripleSlashReferenceValidity from "./rules/tripleSlashReferenceValidity.ts";
 import tsComments from "./rules/tsComments.ts";
 import tslintComments from "./rules/tslintComments.ts";
+import typeAssertionStyles from "./rules/typeAssertionStyles.ts";
 import typeofComparisons from "./rules/typeofComparisons.ts";
 import unassignedVariables from "./rules/unassignedVariables.ts";
 import undefinedVariables from "./rules/undefinedVariables.ts";
@@ -548,6 +549,7 @@ export const ts = createPlugin({
 		tripleSlashReferenceValidity,
 		tsComments,
 		tslintComments,
+		typeAssertionStyles,
 		typeofComparisons,
 		unassignedVariables,
 		undefinedVariables,

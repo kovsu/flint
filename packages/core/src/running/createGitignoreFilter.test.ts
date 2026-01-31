@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { createDiskBackedLinterHost } from "../host/createDiskBackedLinterHost.ts";
 import { createGitignoreFilter } from "./createGitignoreFilter.ts";
@@ -31,12 +31,10 @@ describe("createGitignoreFilter", () => {
 	beforeEach(() => {
 		fs.rmSync(integrationRoot, { force: true, recursive: true });
 		fs.mkdirSync(integrationRoot, { recursive: true });
-		vi.stubGlobal("process", { ...process, cwd: () => integrationRoot });
 	});
 
 	afterEach(() => {
 		fs.rmSync(integrationRoot, { force: true, recursive: true });
-		vi.unstubAllGlobals();
 	});
 
 	// root/

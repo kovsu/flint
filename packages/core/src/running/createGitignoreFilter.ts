@@ -7,10 +7,9 @@ import type { LinterHost } from "../types/host.ts";
 export function createGitignoreFilter(cwd: string, host: LinterHost) {
 	const ig = ignore();
 	const visited = new Set();
-	const rootDir = cwd;
 
 	function loadDir(dir: string): void {
-		if (visited.has(dir) || !dir.startsWith(rootDir)) {
+		if (visited.has(dir) || !dir.startsWith(cwd)) {
 			return;
 		}
 
@@ -30,7 +29,7 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 			return;
 		}
 
-		const prefix = path.relative(rootDir, dir);
+		const prefix = path.relative(cwd, dir);
 
 		const rules = content
 			.split("\n")
@@ -58,6 +57,6 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 
 	return (filePath: string) => {
 		loadDir(path.dirname(makeAbsolute(filePath)));
-		return !ig.ignores(path.relative(rootDir, filePath));
+		return !ig.ignores(path.relative(cwd, filePath));
 	};
 }

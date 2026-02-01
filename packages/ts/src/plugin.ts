@@ -283,6 +283,7 @@ import unnecessaryBooleanCasts from "./rules/unnecessaryBooleanCasts.ts";
 import unnecessaryCatches from "./rules/unnecessaryCatches.ts";
 import unnecessaryComparisons from "./rules/unnecessaryComparisons.ts";
 import unnecessaryConcatenation from "./rules/unnecessaryConcatenation.ts";
+import unnecessaryMathClamps from "./rules/unnecessaryMathClamps.ts";
 import unnecessaryUseStricts from "./rules/unnecessaryUseStricts.ts";
 import unsafeNegations from "./rules/unsafeNegations.ts";
 import variableDeletions from "./rules/variableDeletions.ts";
@@ -579,6 +580,7 @@ export const ts = createPlugin({
 		unnecessaryCatches,
 		unnecessaryComparisons,
 		unnecessaryConcatenation,
+		unnecessaryMathClamps,
 		unnecessaryUseStricts,
 		unsafeNegations,
 		variableDeletions,

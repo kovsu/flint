@@ -1,4 +1,4 @@
-import type { LintResults } from "@flint.fyi/core";
+import type { LinterHost, LintResults } from "@flint.fyi/core";
 import { normalizePath } from "@flint.fyi/core";
 import debounce from "debounce";
 import { debugForFile } from "debug-for-file";
@@ -11,12 +11,13 @@ import { runCliOnce } from "./runCliOnce.ts";
 const log = debugForFile(import.meta.filename);
 
 export async function runCliWatch(
+	host: LinterHost,
 	configFileName: string,
 	getRenderer: () => Renderer,
 	values: OptionsValues,
 ) {
 	const abortController = new AbortController();
-	const cwd = process.cwd();
+	const cwd = host.getCurrentDirectory();
 
 	log("Running single-run CLI once before watching");
 
@@ -24,11 +25,16 @@ export async function runCliWatch(
 		let currentLintResults: LintResults | undefined;
 		let currentRenderer: Renderer;
 
-		function startNewTask() {
+		function startNewTask(initial = false) {
 			const renderer = getRenderer();
 			currentRenderer = renderer;
 
-			runCliOnce(configFileName, renderer, values).then(
+			runCliOnce(
+				host,
+				configFileName,
+				renderer,
+				initial ? values : { ...values, "cache-ignore": false },
+			).then(
 				({ lintResults }) => {
 					if (currentRenderer === renderer) {
 						currentLintResults = lintResults;
@@ -47,10 +53,15 @@ export async function runCliWatch(
 			return renderer;
 		}
 
-		currentRenderer = startNewTask();
+		currentRenderer = startNewTask(true);
 
 		const rerun = debounce((fileName: string) => {
-			if (fileName.startsWith("node_modules/.cache")) {
+			if (
+				fileName.startsWith("node_modules/.cache") ||
+				fileName.startsWith(".git") ||
+				fileName.startsWith(".jj") ||
+				fileName.startsWith(".turbo")
+			) {
 				log(
 					"Skipping re-running watch mode for ignored change to: %s",
 					fileName,

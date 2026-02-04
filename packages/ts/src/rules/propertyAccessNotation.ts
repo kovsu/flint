@@ -5,7 +5,7 @@ import {
 	typescriptLanguage,
 } from "@flint.fyi/typescript-language";
 import ts from "typescript";
-import { z } from "zod";
+import { z } from "zod/v4";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -90,7 +90,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		description:
 			"Reports bracket notation property access when dot notation can be used.",
 		id: "propertyAccessNotation",
-		presets: ["stylistic"],
+		presets: ["stylistic", "stylisticStrict"],
 	},
 	messages: {
 		preferDotNotation: {

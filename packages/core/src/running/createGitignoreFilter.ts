@@ -1,4 +1,3 @@
-import { makeAbsolute } from "@flint.fyi/utils";
 import ignore from "ignore";
 import path from "path";
 
@@ -33,9 +32,9 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 
 		const rules = content
 			.split("\n")
-			.map((line) => line.trim())
-			.filter((line) => line && !line.startsWith("#"))
+			.filter((line) => !(/^\s*$/.test(line) || line.startsWith("#")))
 			.map((rule) => {
+				rule = rule.trim();
 				const negated = rule.startsWith("!");
 				const [negatePrefix, pattern] = negated
 					? ["!", rule.slice(1)]
@@ -55,8 +54,9 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 		ig.add(rules);
 	}
 
+	// Accept a absolute path
 	return (filePath: string) => {
-		loadDir(path.dirname(makeAbsolute(filePath)));
+		loadDir(path.dirname(filePath));
 		return !ig.ignores(path.relative(cwd, filePath));
 	};
 }

@@ -1,8 +1,8 @@
-import { makeAbsolute } from "@flint.fyi/utils";
 import { debugForFile } from "debug-for-file";
 import * as fs from "node:fs/promises";
 import path from "node:path";
 
+import { normalizePath } from "../host/normalizePath.ts";
 import type {
 	ConfigRuleDefinition,
 	ConfigUseDefinition,
@@ -32,7 +32,8 @@ export async function computeUseDefinitions(
 	log("Collecting files from %d use pattern(s)", configDefinition.use.length);
 
 	const allFilePaths = new Set<string>();
-	const gitignoreFilter = createGitignoreFilter(process.cwd(), host);
+	const cwd = host.getCurrentDirectory();
+	const gitignoreFilter = createGitignoreFilter(cwd, host);
 
 	const useDefinitions = await Promise.all(
 		configDefinition.use.map(async (use) => {
@@ -40,6 +41,7 @@ export async function computeUseDefinitions(
 			const foundFilePaths = (
 				await Array.fromAsync(
 					fs.glob([globs.include].flat(), {
+						cwd,
 						exclude: globs.exclude,
 						withFileTypes: true,
 					}),
@@ -47,15 +49,15 @@ export async function computeUseDefinitions(
 			)
 				.map((entry) =>
 					entry.isFile()
-						? path.relative(
-								process.cwd(),
-								makeAbsolute(path.join(entry.parentPath, entry.name)),
+						? normalizePath(
+								path.join(entry.parentPath, entry.name),
+								host.isCaseSensitiveFS(),
 							)
 						: null,
 				)
 				.filter(
-					(filePath): filePath is string =>
-						filePath !== null && gitignoreFilter(filePath),
+					(absolutePath): absolutePath is string =>
+						absolutePath !== null && gitignoreFilter(absolutePath),
 				);
 
 			for (const foundFilePath of foundFilePaths) {

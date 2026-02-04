@@ -28,7 +28,7 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 			return;
 		}
 
-		const prefix = path.relative(cwd, dir);
+		const prefix = path.posix.relative(cwd, dir);
 
 		const rules = content
 			.split("\n")
@@ -57,6 +57,6 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 	// Accept a absolute path
 	return (filePath: string) => {
 		loadDir(path.dirname(filePath));
-		return !ig.ignores(path.relative(cwd, filePath));
+		return !ig.ignores(path.posix.relative(cwd, filePath));
 	};
 }

@@ -1,0 +1,87 @@
+import {
+	type AST,
+	getTSNodeRange,
+	typescriptLanguage,
+} from "@flint.fyi/typescript-language";
+
+import {
+	findMessagesProperty,
+	forEachMessageString,
+	isRuleCreatorCreateRule,
+} from "../utils/ruleCreatorHelpers.ts";
+import { ruleCreator } from "./ruleCreator.ts";
+
+function formatPlaceholders(text: string): string {
+	return text.replaceAll(/\{\{\s*(\w+)\s*\}\}/g, "{{ $1 }}");
+}
+
+function hasMalformedPlaceholders(text: string): boolean {
+	const matches = text.match(/\{\{\s*\w+\s*\}\}/g);
+	if (!matches) {
+		return false;
+	}
+
+	return matches.some((match) => !/\{\{ \w+ \}\}/.test(match));
+}
+
+export default ruleCreator.createRule(typescriptLanguage, {
+	about: {
+		description:
+			"Reports and auto-fixes message placeholders that are not formatted as `{{ placeholder }}`.",
+		id: "placeholderFormatting",
+		presets: ["stylistic"],
+	},
+	messages: {
+		placeholderFormatting: {
+			primary:
+				"Placeholders should be formatted with single spaces inside the braces.",
+			secondary: [
+				"Consistent formatting improves readability of message templates.",
+				"Use exactly one space after the opening braces and before the closing braces.",
+			],
+			suggestions: ["Format placeholder with proper spacing."],
+		},
+	},
+	setup(context) {
+		function checkStringLiteral(
+			node: AST.StringLiteral,
+			sourceFile: AST.SourceFile,
+		) {
+			const text = node.text;
+			if (!hasMalformedPlaceholders(text)) {
+				return;
+			}
+
+			const fixedText = formatPlaceholders(text);
+			const quote = node.getText(sourceFile)[0];
+
+			context.report({
+				fix: {
+					range: getTSNodeRange(node, sourceFile),
+					text: `${quote}${fixedText}${quote}`,
+				},
+				message: "placeholderFormatting",
+				range: getTSNodeRange(node, sourceFile),
+			});
+		}
+
+		return {
+			visitors: {
+				CallExpression(node, { sourceFile, typeChecker }) {
+					if (!isRuleCreatorCreateRule(node, typeChecker)) {
+						return;
+					}
+
+					const messagesProperty = findMessagesProperty(node);
+					if (!messagesProperty) {
+						return;
+					}
+
+					forEachMessageString(messagesProperty, (stringNode) => {
+						checkStringLiteral(stringNode, sourceFile);
+					});
+				},
+			},
+		};
+	},
+});

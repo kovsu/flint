@@ -20,6 +20,7 @@ export default defineConfig({
 			},
 			rules: [
 				flint.presets.logical,
+				flint.presets.stylistic,
 				node.presets.logicalStrict,
 				node.presets.stylisticStrict,
 				ts.presets.logicalStrict,

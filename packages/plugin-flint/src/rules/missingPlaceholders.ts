@@ -50,7 +50,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 			}
 
 			for (const ctx of forEachMessageString(messagesProperty)) {
-				const placeholders = extractPlaceholders(ctx.propertyName);
+				const placeholders = extractPlaceholders(ctx.node.text);
 				if (placeholders.size) {
 					const existing = messagePlaceholders.get(ctx.messageId);
 					if (existing) {

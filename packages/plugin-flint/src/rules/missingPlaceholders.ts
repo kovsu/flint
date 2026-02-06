@@ -8,6 +8,7 @@ import { SyntaxKind } from "typescript";
 import {
 	findMessagesProperty,
 	forEachMessageString,
+	isRuleContextReport,
 	isRuleCreatorCreateRule,
 } from "../utils/ruleCreatorHelpers.ts";
 import { ruleCreator } from "./ruleCreator.ts";
@@ -20,21 +21,6 @@ function extractPlaceholders(text: string): Set<string> {
 		}
 	}
 	return placeholders;
-}
-
-function isRuleContextReport(
-	node: AST.CallExpression,
-	typeChecker: import("typescript").TypeChecker,
-): boolean {
-	if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
-		return false;
-	}
-
-	const propertyAccess = node.expression;
-	const type = typeChecker.getTypeAtLocation(propertyAccess.expression);
-	const typeName = type.getSymbol()?.getName();
-
-	return typeName === "RuleContext" && propertyAccess.name.text === "report";
 }
 
 export default ruleCreator.createRule(typescriptLanguage, {
@@ -63,8 +49,8 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			forEachMessageString(messagesProperty, (stringNode, ctx) => {
-				const placeholders = extractPlaceholders(stringNode.text);
+			for (const ctx of forEachMessageString(messagesProperty)) {
+				const placeholders = extractPlaceholders(ctx.propertyName);
 				if (placeholders.size) {
 					const existing = messagePlaceholders.get(ctx.messageId);
 					if (existing) {
@@ -75,7 +61,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 						messagePlaceholders.set(ctx.messageId, placeholders);
 					}
 				}
-			});
+			}
 		}
 
 		function populateMessageInCreateRule(
@@ -168,15 +154,11 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		return {
 			visitors: {
 				CallExpression(node, { sourceFile, typeChecker }) {
-					// TODO: Maybe need to check it more strictly
-					// https://github.com/flint-fyi/flint/issues/152
 					if (isRuleCreatorCreateRule(node, typeChecker)) {
 						checkMessageInCreateRule(node);
 						return;
 					}
 
-					// TODO: Maybe need to check it more strictly
-					// https://github.com/flint-fyi/flint/issues/152
 					if (isRuleContextReport(node, typeChecker)) {
 						populateMessageInCreateRule(node, sourceFile);
 						return;

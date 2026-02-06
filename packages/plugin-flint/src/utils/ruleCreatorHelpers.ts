@@ -1,10 +1,10 @@
 import type { AST } from "@flint.fyi/typescript-language";
-import { SyntaxKind } from "typescript";
-import type ts from "typescript";
+import ts, { SyntaxKind } from "typescript";
 
 interface MessageStringVisitorContext {
 	isInArray: boolean;
 	messageId: string;
+	node: AST.StringLiteral;
 	propertyName: string;
 }
 
@@ -31,13 +31,9 @@ export function findMessagesProperty(
 	return undefined;
 }
 
-export function forEachMessageString(
+export function* forEachMessageString(
 	messagesProperty: AST.PropertyAssignment,
-	callback: (
-		node: AST.StringLiteral,
-		context: MessageStringVisitorContext,
-	) => void,
-): void {
+): Generator<MessageStringVisitorContext> {
 	if (
 		messagesProperty.initializer.kind !== SyntaxKind.ObjectLiteralExpression
 	) {
@@ -66,21 +62,23 @@ export function forEachMessageString(
 			const propertyName = messageProp.name.text;
 
 			if (messageProp.initializer.kind === SyntaxKind.StringLiteral) {
-				callback(messageProp.initializer, {
+				yield {
 					isInArray: false,
 					messageId,
+					node: messageProp.initializer,
 					propertyName,
-				});
+				};
 			}
 
 			if (messageProp.initializer.kind === SyntaxKind.ArrayLiteralExpression) {
 				for (const el of messageProp.initializer.elements) {
 					if (el.kind === SyntaxKind.StringLiteral) {
-						callback(el, {
+						yield {
 							isInArray: true,
 							messageId,
+							node: el,
 							propertyName,
-						});
+						};
 					}
 				}
 			}
@@ -88,6 +86,16 @@ export function forEachMessageString(
 	}
 }
 
+export function getStringOriginalQuote(
+	node: AST.StringLiteral,
+	sourceFile: AST.SourceFile,
+): string {
+	const text = node.getText(sourceFile);
+	return text[0] ?? '"';
+}
+
+// TODO: Maybe need to check it more strictly
+// https://github.com/flint-fyi/flint/issues/152
 export function isRuleCreatorCreateRule(
 	node: AST.CallExpression,
 	typeChecker: ts.TypeChecker,
@@ -103,4 +111,21 @@ export function isRuleCreatorCreateRule(
 	return (
 		typeName === "RuleCreator" && propertyAccess.name.text === "createRule"
 	);
+}
+
+// TODO: Maybe need to check it more strictly
+// https://github.com/flint-fyi/flint/issues/152
+export function isRuleContextReport(
+	node: AST.CallExpression,
+	typeChecker: ts.TypeChecker,
+): boolean {
+	if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
+		return false;
+	}
+
+	const propertyAccess = node.expression;
+	const type = typeChecker.getTypeAtLocation(propertyAccess.expression);
+	const typeName = type.getSymbol()?.getName();
+
+	return typeName === "RuleContext" && propertyAccess.name.text === "report";
 }

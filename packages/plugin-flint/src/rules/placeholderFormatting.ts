@@ -7,6 +7,7 @@ import {
 import {
 	findMessagesProperty,
 	forEachMessageString,
+	getStringOriginalQuote,
 	isRuleCreatorCreateRule,
 } from "../utils/ruleCreatorHelpers.ts";
 import { ruleCreator } from "./ruleCreator.ts";
@@ -53,7 +54,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 			}
 
 			const fixedText = formatPlaceholders(text);
-			const quote = node.getText(sourceFile)[0];
+			const quote = getStringOriginalQuote(node, sourceFile);
 
 			context.report({
 				fix: {
@@ -77,9 +78,9 @@ export default ruleCreator.createRule(typescriptLanguage, {
 						return;
 					}
 
-					forEachMessageString(messagesProperty, (stringNode) => {
-						checkStringLiteral(stringNode, sourceFile);
-					});
+					for (const ctx of forEachMessageString(messagesProperty)) {
+						checkStringLiteral(ctx.node, sourceFile);
+					}
 				},
 			},
 		};

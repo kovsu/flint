@@ -1,40 +1,20 @@
-import fs from "node:fs";
 import path from "node:path";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 
-import { createDiskBackedLinterHost } from "../host/createDiskBackedLinterHost.ts";
+import { createVFSLinterHost } from "../host/createVFSLinterHost.ts";
+import type { VFSLinterHost } from "../types/host.ts";
 import { createGitignoreFilter } from "./createGitignoreFilter.ts";
 
-const INTEGRATION_DIR_NAME = ".flint-gitignore-filter-integration-tests";
-
-function findUpNodeModules(startDir: string): string {
-	let current = startDir;
-	while (true) {
-		const candidate = path.join(current, "node_modules");
-		if (fs.existsSync(candidate)) {
-			return candidate;
-		}
-		const parent = path.dirname(current);
-		if (parent === current) {
-			throw new Error("Could not find node_modules directory.");
-		}
-		current = parent;
-	}
-}
-
 describe("createGitignoreFilter", () => {
-	const integrationRoot = path.join(
-		findUpNodeModules(import.meta.dirname),
-		INTEGRATION_DIR_NAME,
-	);
+	const integrationRoot = "/root";
+
+	let host: VFSLinterHost;
 
 	beforeEach(() => {
-		fs.rmSync(integrationRoot, { force: true, recursive: true });
-		fs.mkdirSync(integrationRoot, { recursive: true });
-	});
-
-	afterEach(() => {
-		fs.rmSync(integrationRoot, { force: true, recursive: true });
+		host = createVFSLinterHost({
+			caseSensitive: true,
+			cwd: integrationRoot,
+		});
 	});
 
 	// root/
@@ -42,10 +22,8 @@ describe("createGitignoreFilter", () => {
 	//     └── file.ts
 	it("returns true for files when no .gitignore exists", () => {
 		const filePath = path.join(integrationRoot, "src", "file.ts");
-		fs.mkdirSync(path.dirname(filePath), { recursive: true });
-		fs.writeFileSync(filePath, "content");
+		host.vfsUpsertFile(filePath, "content");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(filePath)).toBe(true);
 	});
@@ -58,18 +36,18 @@ describe("createGitignoreFilter", () => {
 	// └── src/
 	//     └── index.ts   ✓ not ignored
 	it("filters files matching root .gitignore patterns", () => {
-		fs.writeFileSync(path.join(integrationRoot, ".gitignore"), "*.log\ndist/");
+		host.vfsUpsertFile(
+			path.join(integrationRoot, ".gitignore"),
+			"*.log\ndist/",
+		);
 		const logFile = path.join(integrationRoot, "debug.log");
 		const distFile = path.join(integrationRoot, "dist", "bundle.js");
 		const srcFile = path.join(integrationRoot, "src", "index.ts");
 
-		fs.writeFileSync(logFile, "log content");
-		fs.mkdirSync(path.dirname(distFile), { recursive: true });
-		fs.writeFileSync(distFile, "bundle content");
-		fs.mkdirSync(path.dirname(srcFile), { recursive: true });
-		fs.writeFileSync(srcFile, "source content");
+		host.vfsUpsertFile(logFile, "log content");
+		host.vfsUpsertFile(distFile, "bundle content");
+		host.vfsUpsertFile(srcFile, "source content");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(logFile)).toBe(false);
 		expect(gitignoreFilter(distFile)).toBe(false);
@@ -81,17 +59,16 @@ describe("createGitignoreFilter", () => {
 	// ├── debug.log        ❌ ignored
 	// └── important.log    ✓ not ignored (negated)
 	it("handles negation patterns", () => {
-		fs.writeFileSync(
+		host.vfsUpsertFile(
 			path.join(integrationRoot, ".gitignore"),
 			"*.log\n!important.log",
 		);
 		const debugLog = path.join(integrationRoot, "debug.log");
 		const importantLog = path.join(integrationRoot, "important.log");
 
-		fs.writeFileSync(debugLog, "debug");
-		fs.writeFileSync(importantLog, "important");
+		host.vfsUpsertFile(debugLog, "debug");
+		host.vfsUpsertFile(importantLog, "important");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(debugLog)).toBe(false);
 		expect(gitignoreFilter(importantLog)).toBe(true);
@@ -107,18 +84,14 @@ describe("createGitignoreFilter", () => {
 	//             └── bundle.js ❌ ignored
 	it("handles unanchored pattern in nested .gitignore (should match any depth)", () => {
 		const srcDir = path.join(integrationRoot, "src");
-		fs.mkdirSync(srcDir, { recursive: true });
-		fs.writeFileSync(path.join(srcDir, ".gitignore"), "dist");
+		host.vfsUpsertFile(path.join(srcDir, ".gitignore"), "dist");
 
 		const srcDist = path.join(srcDir, "dist", "bundle.js");
 		const nestedDist = path.join(srcDir, "nested", "dist", "bundle.js");
 
-		fs.mkdirSync(path.dirname(srcDist), { recursive: true });
-		fs.writeFileSync(srcDist, "bundle");
-		fs.mkdirSync(path.dirname(nestedDist), { recursive: true });
-		fs.writeFileSync(nestedDist, "nested bundle");
+		host.vfsUpsertFile(srcDist, "bundle");
+		host.vfsUpsertFile(nestedDist, "nested bundle");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(srcDist)).toBe(false);
 		expect(gitignoreFilter(nestedDist)).toBe(false);
@@ -133,20 +106,15 @@ describe("createGitignoreFilter", () => {
 	//     │   └── output.js  ✓ not ignored
 	//     └── index.ts       ✓ not ignored
 	it("handles absolute path patterns with leading slash", () => {
-		fs.writeFileSync(path.join(integrationRoot, ".gitignore"), "/build");
+		host.vfsUpsertFile(path.join(integrationRoot, ".gitignore"), "/build");
 		const rootBuild = path.join(integrationRoot, "build", "output.js");
 		const srcFile = path.join(integrationRoot, "src", "index.ts");
 		const srcBuild = path.join(integrationRoot, "src", "build", "output.js");
 
-		fs.mkdirSync(path.dirname(rootBuild), { recursive: true });
-		fs.writeFileSync(rootBuild, "root build");
-		fs.mkdirSync(path.dirname(srcFile), { recursive: true });
-		fs.writeFileSync(srcFile, "source");
+		host.vfsUpsertFile(rootBuild, "root build");
+		host.vfsUpsertFile(srcFile, "source");
+		host.vfsUpsertFile(srcBuild, "src build");
 
-		fs.mkdirSync(path.dirname(srcBuild), { recursive: true });
-		fs.writeFileSync(srcBuild, "src build");
-
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(rootBuild)).toBe(false);
 		expect(gitignoreFilter(srcFile)).toBe(true);
@@ -163,23 +131,20 @@ describe("createGitignoreFilter", () => {
 	//     └── temp/
 	//         └── cache.txt ❌ ignored (from src/.gitignore)
 	it("handles nested .gitignore files", () => {
-		fs.writeFileSync(path.join(integrationRoot, ".gitignore"), "*.log");
+		host.vfsUpsertFile(path.join(integrationRoot, ".gitignore"), "*.log");
 		const srcDir = path.join(integrationRoot, "src");
-		fs.mkdirSync(srcDir, { recursive: true });
-		fs.writeFileSync(path.join(srcDir, ".gitignore"), "temp/");
+		host.vfsUpsertFile(path.join(srcDir, ".gitignore"), "temp/");
 
 		const rootLog = path.join(integrationRoot, "root.log");
 		const srcLog = path.join(srcDir, "src.log");
 		const srcTemp = path.join(srcDir, "temp", "cache.txt");
 		const srcFile = path.join(srcDir, "index.ts");
 
-		fs.writeFileSync(rootLog, "root log");
-		fs.writeFileSync(srcLog, "src log");
-		fs.mkdirSync(path.dirname(srcTemp), { recursive: true });
-		fs.writeFileSync(srcTemp, "cache");
-		fs.writeFileSync(srcFile, "source");
+		host.vfsUpsertFile(rootLog, "root log");
+		host.vfsUpsertFile(srcLog, "src log");
+		host.vfsUpsertFile(srcTemp, "cache");
+		host.vfsUpsertFile(srcFile, "source");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(rootLog)).toBe(false);
 		expect(gitignoreFilter(srcLog)).toBe(false);
@@ -194,8 +159,7 @@ describe("createGitignoreFilter", () => {
 	//     └── keep.generated.ts   ✓ not ignored (negated)
 	it("handles negation with leading slash in subdirectory", () => {
 		const srcDir = path.join(integrationRoot, "src");
-		fs.mkdirSync(srcDir, { recursive: true });
-		fs.writeFileSync(
+		host.vfsUpsertFile(
 			path.join(srcDir, ".gitignore"),
 			"*.generated.ts\n!/keep.generated.ts",
 		);
@@ -203,10 +167,9 @@ describe("createGitignoreFilter", () => {
 		const ignoredFile = path.join(srcDir, "api.generated.ts");
 		const keptFile = path.join(srcDir, "keep.generated.ts");
 
-		fs.writeFileSync(ignoredFile, "generated");
-		fs.writeFileSync(keptFile, "keep");
+		host.vfsUpsertFile(ignoredFile, "generated");
+		host.vfsUpsertFile(keptFile, "keep");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(ignoredFile)).toBe(false);
 		expect(gitignoreFilter(keptFile)).toBe(true);
@@ -217,19 +180,117 @@ describe("createGitignoreFilter", () => {
 	// ├── debug.log    ❌ ignored
 	// └── index.ts     ✓ not ignored
 	it("ignores comments and empty lines", () => {
-		fs.writeFileSync(
+		host.vfsUpsertFile(
 			path.join(integrationRoot, ".gitignore"),
 			"# This is a comment\n\n*.log\n   \n# Another comment",
 		);
 		const logFile = path.join(integrationRoot, "debug.log");
 		const tsFile = path.join(integrationRoot, "index.ts");
 
-		fs.writeFileSync(logFile, "log");
-		fs.writeFileSync(tsFile, "source");
+		host.vfsUpsertFile(logFile, "log");
+		host.vfsUpsertFile(tsFile, "source");
 
-		const host = createDiskBackedLinterHost(integrationRoot);
 		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
 		expect(gitignoreFilter(logFile)).toBe(false);
 		expect(gitignoreFilter(tsFile)).toBe(true);
+	});
+
+	// root/
+	// ├── .gitignore   (file\ with\ space\ )
+	// ├── file with space     ❌ ignored (matched by escaped trailing space pattern)
+	// ├── file with space .js ✓ not ignored
+	// └── normal.txt          ✓ not ignored
+	it("handles escaped trailing spaces", () => {
+		host.vfsUpsertFile(
+			path.join(integrationRoot, ".gitignore"),
+			"file\\ with\\ space\\ ",
+		);
+		const fileWithSpace = path.join(integrationRoot, "file with space ");
+		const fileWithSpaceJs = path.join(integrationRoot, "file with space .js");
+		const normalFile = path.join(integrationRoot, "normal.txt");
+
+		host.vfsUpsertFile(fileWithSpace, "content");
+		host.vfsUpsertFile(fileWithSpaceJs, "content");
+		host.vfsUpsertFile(normalFile, "content");
+
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
+		expect(gitignoreFilter(fileWithSpace)).toBe(false);
+		expect(gitignoreFilter(fileWithSpaceJs)).toBe(true);
+		expect(gitignoreFilter(normalFile)).toBe(true);
+	});
+
+	// root/
+	// ├── .gitignore   (  *.log with leading spaces)
+	// ├── test.log         ✓ not ignored (leading spaces prevent matching)
+	// ├──  test.log         ❌ ignored (matched by escaped leading space pattern)
+	// └── test.txt         ✓ not ignored
+	it("treats leading spaces as part of the pattern", () => {
+		host.vfsUpsertFile(path.join(integrationRoot, ".gitignore"), "  *.log");
+		const logFile = path.join(integrationRoot, "test.log");
+		const logFileWithSpaces = path.join(integrationRoot, "  test.log");
+		const txtFile = path.join(integrationRoot, "test.txt");
+
+		host.vfsUpsertFile(logFile, "content");
+		host.vfsUpsertFile(logFileWithSpaces, "content");
+		host.vfsUpsertFile(txtFile, "content");
+
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
+		expect(gitignoreFilter(logFile)).toBe(true);
+		expect(gitignoreFilter(logFileWithSpaces)).toBe(false);
+		expect(gitignoreFilter(txtFile)).toBe(true);
+	});
+
+	// root/
+	// └── src/
+	//     ├── .gitignore   (foo/bar.js - pattern with slash in middle)
+	//     ├── foo/
+	//     │   └── bar.js       ❌ ignored (relative to src/)
+	//     ├── nested/
+	//     │   └── foo/
+	//     │       └── bar.js   ✓ not ignored (slash makes it relative, not recursive)
+	//     └── baz.js           ✓ not ignored
+	it("handles patterns with slash in the middle", () => {
+		const srcDir = path.join(integrationRoot, "src");
+		host.vfsUpsertFile(path.join(srcDir, ".gitignore"), "foo/bar.js");
+
+		const directMatch = path.join(srcDir, "foo", "bar.js");
+		const nestedMatch = path.join(srcDir, "nested", "foo", "bar.js");
+		const otherFile = path.join(srcDir, "baz.js");
+
+		host.vfsUpsertFile(directMatch, "content");
+		host.vfsUpsertFile(nestedMatch, "content");
+		host.vfsUpsertFile(otherFile, "content");
+
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
+		expect(gitignoreFilter(directMatch)).toBe(false);
+		expect(gitignoreFilter(nestedMatch)).toBe(true);
+		expect(gitignoreFilter(otherFile)).toBe(true);
+	});
+
+	// root/
+	// └── src/
+	//     ├── .gitignore   (*.js - no slash, matches any depth)
+	//     ├── foo/
+	//     │   └── bar.js       ❌ ignored (matches at any depth)
+	//     ├── nested/
+	//     │   └── deep/
+	//     │       └── test.js  ❌ ignored (matches at any depth)
+	//     └── baz.js           ❌ ignored
+	it("handles patterns without slash", () => {
+		const srcDir = path.join(integrationRoot, "src");
+		host.vfsUpsertFile(path.join(srcDir, ".gitignore"), "*.js");
+
+		const directFile = path.join(srcDir, "baz.js");
+		const nestedFile = path.join(srcDir, "foo", "bar.js");
+		const deepFile = path.join(srcDir, "nested", "deep", "test.js");
+
+		host.vfsUpsertFile(directFile, "content");
+		host.vfsUpsertFile(nestedFile, "content");
+		host.vfsUpsertFile(deepFile, "content");
+
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
+		expect(gitignoreFilter(directFile)).toBe(false);
+		expect(gitignoreFilter(nestedFile)).toBe(false);
+		expect(gitignoreFilter(deepFile)).toBe(false);
 	});
 });

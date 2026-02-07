@@ -12,7 +12,7 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 			return;
 		}
 
-		const parent = path.dirname(dir);
+		const parent = path.posix.dirname(dir);
 		if (parent !== dir) {
 			loadDir(parent);
 		}
@@ -34,14 +34,20 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 			.split("\n")
 			.filter((line) => !(/^\s*$/.test(line) || line.startsWith("#")))
 			.map((rule) => {
-				rule = rule.trim();
 				const negated = rule.startsWith("!");
 				const [negatePrefix, pattern] = negated
 					? ["!", rule.slice(1)]
 					: ["", rule];
 
-				if (pattern.startsWith("/")) {
-					return `${negatePrefix}${prefix}${pattern}`;
+				const hasSlash = pattern.includes("/");
+				if (hasSlash) {
+					const relativePattern = pattern.startsWith("/")
+						? pattern
+						: "/" + pattern;
+
+					return prefix
+						? `${negatePrefix}${prefix}${relativePattern}`
+						: `${negatePrefix}${relativePattern}`;
 				}
 
 				if (prefix) {
@@ -56,7 +62,7 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 
 	// Accept a absolute path
 	return (filePath: string) => {
-		loadDir(path.dirname(filePath));
+		loadDir(path.posix.dirname(filePath));
 		return !ig.ignores(path.posix.relative(cwd, filePath));
 	};
 }

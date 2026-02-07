@@ -39,9 +39,12 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 					? ["!", rule.slice(1)]
 					: ["", rule];
 
-				const hasSlash = pattern.includes("/");
-				if (hasSlash) {
-					const relativePattern = pattern.startsWith("/")
+				const patternWithoutTrailingSlash = pattern.replace(/\/$/, "");
+				const hasSlashInBeginningOrMiddle =
+					patternWithoutTrailingSlash.includes("/");
+
+				if (hasSlashInBeginningOrMiddle) {
+					const relativePattern = patternWithoutTrailingSlash.startsWith("/")
 						? pattern
 						: "/" + pattern;
 

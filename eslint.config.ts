@@ -52,6 +52,7 @@ export default defineConfig(
 		"packages/*/lib",
 		"packages/fixtures",
 		"pnpm-lock.yaml",
+		"coverage",
 	]),
 	{ linterOptions: { reportUnusedDisableDirectives: "error" } },
 	{
@@ -90,6 +91,10 @@ export default defineConfig(
 						imports: true,
 					},
 				},
+			],
+			"@typescript-eslint/prefer-nullish-coalescing": [
+				"error",
+				{ ignorePrimitives: true },
 			],
 			"@typescript-eslint/restrict-template-expressions": [
 				"error",

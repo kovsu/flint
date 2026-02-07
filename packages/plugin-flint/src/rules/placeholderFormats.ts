@@ -29,11 +29,11 @@ export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
 		description:
 			"Reports and auto-fixes message placeholders that are not formatted as `{{ placeholder }}`.",
-		id: "placeholderFormatting",
+		id: "placeholderFormats",
 		presets: ["stylistic"],
 	},
 	messages: {
-		placeholderFormatting: {
+		placeholderFormats: {
 			primary:
 				"Placeholders should be formatted with single spaces inside the braces.",
 			secondary: [
@@ -61,7 +61,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					range: getTSNodeRange(node, sourceFile),
 					text: `${quote}${fixedText}${quote}`,
 				},
-				message: "placeholderFormatting",
+				message: "placeholderFormats",
 				range: getTSNodeRange(node, sourceFile),
 			});
 		}

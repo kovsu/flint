@@ -1,4 +1,4 @@
-import rule from "./placeholderFormatting.ts";
+import rule from "./placeholderFormats.ts";
 import { ruleTester } from "./ruleTester.ts";
 
 const DefineRuleCreator = `interface RuleCreator { createRule<T>(language: any, ruleConfig: { messages: Record<string, string> }): T; }`;

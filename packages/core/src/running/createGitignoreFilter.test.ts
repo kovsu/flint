@@ -288,6 +288,30 @@ describe("createGitignoreFilter", () => {
 	});
 
 	// root/
+	// ├── .gitignore   (build/)
+	// ├── build/           ❌ ignored
+	// │   └── output.js    ❌ ignored
+	// ├── build.js         ✓ not ignored (file, not directory)
+	// └── src/
+	//     └── build/      	❌ ignored
+	it("handles trailing slash (directory only)", () => {
+		host.vfsUpsertFile(path.join(integrationRoot, ".gitignore"), "build/");
+		const buildDir = path.join(integrationRoot, "build", "output.js");
+		const buildFile = path.join(integrationRoot, "build.js");
+		const nestedBuildDir = path.join(
+			integrationRoot,
+			"src",
+			"build",
+			"file.js",
+		);
+
+		const gitignoreFilter = createGitignoreFilter(integrationRoot, host);
+		expect(gitignoreFilter(buildDir)).toBe(false);
+		expect(gitignoreFilter(buildFile)).toBe(true);
+		expect(gitignoreFilter(nestedBuildDir)).toBe(false);
+	});
+
+	// root/
 	// ├── .gitignore   (/build/)
 	// ├── build/           ❌ ignored (anchored directory)
 	// │   └── output.js    ❌ ignored

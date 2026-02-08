@@ -18,7 +18,7 @@ export function createGitignoreFilter(cwd: string, host: LinterHost) {
 		}
 		visited.add(dir);
 
-		const gitignorePath = path.join(dir, ".gitignore");
+		const gitignorePath = path.posix.join(dir, ".gitignore");
 		if (host.stat(gitignorePath) !== "file") {
 			return;
 		}

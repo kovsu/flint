@@ -1,6 +1,7 @@
 import { nullThrows } from "@flint.fyi/utils";
 import { CachedFactory } from "cached-factory";
 import { debugForFile } from "debug-for-file";
+import { AsyncLocalStorage } from "node:async_hooks";
 
 import type { FileReport } from "../types/reports.ts";
 import type { AnyRule } from "../types/rules.ts";
@@ -14,6 +15,8 @@ import type { LanguageFilesWithOptions } from "./types.ts";
 
 const log = debugForFile(import.meta.filename);
 
+const fileContext = new AsyncLocalStorage<string>();
+
 export async function runLintRule(
 	rule: AnyRule,
 	filesAndOptions: LanguageFilesWithOptions[],
@@ -22,11 +25,10 @@ export async function runLintRule(
 
 	const reportsByFilePath = new CachedFactory<string, FileReport[]>(() => []);
 	const sourceTextByFilePath = new Map<string, string>();
-	let currentFilePath: string | undefined;
 
 	const ruleRuntime = await rule.setup({
 		report(ruleReport) {
-			const filePath = ruleReport.filePath ?? currentFilePath;
+			const filePath = ruleReport.filePath ?? fileContext.getStore();
 			if (!filePath) {
 				throw new Error(
 					"`filePath` not provided in a rule report() not called by a visitor.",
@@ -71,9 +73,10 @@ export async function runLintRule(
 					);
 
 				for (const { file, language } of languageFiles) {
-					currentFilePath = file.about.filePath;
-					sourceTextByFilePath.set(currentFilePath, file.about.sourceText);
-					language.runFileVisitors(file, parsedOptions, ruleRuntime);
+					sourceTextByFilePath.set(file.about.filePath, file.about.sourceText);
+					fileContext.run(file.about.filePath, () => {
+						language.runFileVisitors(file, parsedOptions, ruleRuntime);
+					});
 				}
 			}
 		}

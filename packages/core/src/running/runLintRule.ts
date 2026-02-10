@@ -2,7 +2,6 @@ import { nullThrows } from "@flint.fyi/utils";
 import { CachedFactory } from "cached-factory";
 import { debugForFile } from "debug-for-file";
 
-import type { AnyLanguageFile } from "../types/languages.ts";
 import type { FileReport } from "../types/reports.ts";
 import type { AnyRule } from "../types/rules.ts";
 import type {
@@ -22,20 +21,23 @@ export async function runLintRule(
 	// 1. Set up the rule's runtime, which receives and processes reports
 
 	const reportsByFilePath = new CachedFactory<string, FileReport[]>(() => []);
-	let currentFile: AnyLanguageFile | undefined;
+	const sourceTextByFilePath = new Map<string, string>();
+	let currentFilePath: string | undefined;
 
 	const ruleRuntime = await rule.setup({
 		report(ruleReport) {
-			if (!currentFile) {
+			const filePath = ruleReport.filePath ?? currentFilePath;
+			if (!filePath) {
 				throw new Error(
 					"`filePath` not provided in a rule report() not called by a visitor.",
 				);
 			}
-
-			const filePath = ruleReport.filePath ?? currentFile.about.filePath;
-
-			log("Adding %s report for file path %s", ruleReport.message, filePath);
-
+			const sourceText = sourceTextByFilePath.get(filePath);
+			if (!sourceText) {
+				throw new Error(
+					`Cannot resolve source text for report file path "${filePath}".`,
+				);
+			}
 			reportsByFilePath.get(filePath).push({
 				...ruleReport,
 				about: rule.about,
@@ -48,14 +50,8 @@ export async function runLintRule(
 					`Rule "${rule.about.id}" reported message "${ruleReport.message}" which is not defined in its messages.`,
 				),
 				range: {
-					begin: getColumnAndLineOfPosition(
-						currentFile.about.sourceText,
-						ruleReport.range.begin,
-					),
-					end: getColumnAndLineOfPosition(
-						currentFile.about.sourceText,
-						ruleReport.range.end,
-					),
+					begin: getColumnAndLineOfPosition(sourceText, ruleReport.range.begin),
+					end: getColumnAndLineOfPosition(sourceText, ruleReport.range.end),
 				},
 			});
 		},
@@ -75,7 +71,8 @@ export async function runLintRule(
 					);
 
 				for (const { file, language } of languageFiles) {
-					currentFile = file;
+					currentFilePath = file.about.filePath;
+					sourceTextByFilePath.set(currentFilePath, file.about.sourceText);
 					language.runFileVisitors(file, parsedOptions, ruleRuntime);
 				}
 			}

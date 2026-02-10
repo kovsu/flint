@@ -21,6 +21,7 @@ export async function runLintRule(
 	// 1. Set up the rule's runtime, which receives and processes reports
 
 	const reportsByFilePath = new CachedFactory<string, FileReport[]>(() => []);
+	const sourceTextByFilePath = new Map<string, string>();
 	let currentFile: AnyLanguageFile | undefined;
 
 	const ruleRuntime = await rule.setup({
@@ -55,11 +56,14 @@ export async function runLintRule(
 					);
 
 				for (const { file, language } of languageFiles) {
+					sourceTextByFilePath.set(file.about.filePath, file.about.sourceText);
 					currentFile = file;
 					language.runFileVisitors(file, parsedOptions, ruleRuntime);
 				}
 			}
 		}
+
+		currentFile = undefined;
 
 		// 2b. If the rule has a teardown, run that after any visitors are done
 		await ruleRuntime.teardown?.();

@@ -1,8 +1,8 @@
 import { nullThrows } from "@flint.fyi/utils";
 import { CachedFactory } from "cached-factory";
 import { debugForFile } from "debug-for-file";
-import { AsyncLocalStorage } from "node:async_hooks";
 
+import type { AnyLanguageFile } from "../types/languages.ts";
 import type { FileReport } from "../types/reports.ts";
 import type { AnyRule } from "../types/rules.ts";
 import type {
@@ -15,8 +15,6 @@ import type { LanguageFilesWithOptions } from "./types.ts";
 
 const log = debugForFile(import.meta.filename);
 
-const fileContext = new AsyncLocalStorage<string>();
-
 export async function runLintRule(
 	rule: AnyRule,
 	filesAndOptions: LanguageFilesWithOptions[],
@@ -25,21 +23,27 @@ export async function runLintRule(
 
 	const reportsByFilePath = new CachedFactory<string, FileReport[]>(() => []);
 	const sourceTextByFilePath = new Map<string, string>();
+	let currentFile: AnyLanguageFile | undefined;
 
 	const ruleRuntime = await rule.setup({
 		report(ruleReport) {
-			const filePath = ruleReport.filePath ?? fileContext.getStore();
+			const filePath = ruleReport.filePath ?? currentFile?.about.filePath;
 			if (!filePath) {
 				throw new Error(
 					"`filePath` not provided in a rule report() not called by a visitor.",
 				);
 			}
-			const sourceText = sourceTextByFilePath.get(filePath);
+
+			const sourceText =
+				currentFile?.about.filePath === filePath
+					? currentFile.about.sourceText
+					: sourceTextByFilePath.get(filePath);
 			if (!sourceText) {
 				throw new Error(
 					`Cannot resolve source text for report file path "${filePath}".`,
 				);
 			}
+
 			reportsByFilePath.get(filePath).push({
 				...ruleReport,
 				about: rule.about,
@@ -74,12 +78,13 @@ export async function runLintRule(
 
 				for (const { file, language } of languageFiles) {
 					sourceTextByFilePath.set(file.about.filePath, file.about.sourceText);
-					fileContext.run(file.about.filePath, () => {
-						language.runFileVisitors(file, parsedOptions, ruleRuntime);
-					});
+					currentFile = file;
+					language.runFileVisitors(file, parsedOptions, ruleRuntime);
 				}
 			}
 		}
+
+		currentFile = undefined;
 
 		// 2b. If the rule has a teardown, run that after any visitors are done
 		await ruleRuntime.teardown?.();

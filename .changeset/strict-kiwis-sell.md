@@ -2,4 +2,4 @@
 "@flint.fyi/site": patch
 ---
 
-docs: correct arg attribute to args
+Correct arg attribute to args.

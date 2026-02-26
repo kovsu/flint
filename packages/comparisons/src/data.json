@@ -7266,8 +7266,7 @@
 		],
 		"flint": {
 			"name": "yamlKeys",
-			"plugin": "sorting",
-			"preset": "stylistic"
+			"plugin": "sorting"
 		}
 	},
 	{

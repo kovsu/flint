@@ -91,6 +91,7 @@ export default defineConfig(
 					enableAutofixRemoval: {
 						imports: true,
 					},
+					ignoreUsingDeclarations: true,
 				},
 			],
 			"@typescript-eslint/prefer-nullish-coalescing": [

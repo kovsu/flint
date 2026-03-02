@@ -94,7 +94,18 @@ export function getStringOriginalQuote(
 	return text[0] ?? '"';
 }
 
-function isCallExpression(
+export function isLanguageCreateRule(
+	node: AST.CallExpression,
+	typeChecker: Checker,
+): boolean {
+	return (
+		node.expression.kind === SyntaxKind.PropertyAccessExpression &&
+		node.expression.name.text === "createRule" &&
+		!isRuleCreatorCreateRule(node, typeChecker)
+	);
+}
+
+function isTypedMethodCall(
 	node: AST.CallExpression,
 	typeChecker: Checker,
 	leftType: string,
@@ -116,9 +127,9 @@ function isCallExpression(
 export const isRuleCreatorCreateRule = (
 	node: AST.CallExpression,
 	typeChecker: Checker,
-) => isCallExpression(node, typeChecker, "RuleCreator", "createRule");
+) => isTypedMethodCall(node, typeChecker, "RuleCreator", "createRule");
 
 export const isRuleContextReport = (
 	node: AST.CallExpression,
 	typeChecker: Checker,
-) => isCallExpression(node, typeChecker, "RuleContext", "report");
+) => isTypedMethodCall(node, typeChecker, "RuleContext", "report");

@@ -6,8 +6,8 @@ import {
 } from "@flint.fyi/typescript-language";
 import { SyntaxKind } from "typescript";
 
+import { findProperty } from "../utils/findProperty.ts";
 import {
-	findMessagesProperty,
 	isRuleContextReport,
 	isRuleCreatorCreateRule,
 } from "../utils/ruleCreatorHelpers.ts";
@@ -30,21 +30,27 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		},
 	},
 	setup(context) {
-		const unusedMessageIds = new Map<string, CharacterReportRange[]>();
+		const unusedMessageIds = new Map<string, CharacterReportRange>();
 
 		function collectMessageIds(
 			node: AST.CallExpression,
 			sourceFile: AST.SourceFile,
 		) {
-			const messagesProperty = findMessagesProperty(node);
-			if (
-				messagesProperty?.initializer.kind !==
-				SyntaxKind.ObjectLiteralExpression
-			) {
+			const args = node.arguments[1];
+			if (args?.kind !== SyntaxKind.ObjectLiteralExpression) {
+				return;
+			}
+			const messagesProperty = findProperty(
+				args.properties,
+				"messages",
+				(node) => node.kind === SyntaxKind.ObjectLiteralExpression,
+			);
+
+			if (!messagesProperty) {
 				return;
 			}
 
-			for (const prop of messagesProperty.initializer.properties) {
+			for (const prop of messagesProperty.properties) {
 				if (
 					prop.kind !== SyntaxKind.PropertyAssignment ||
 					prop.name.kind !== SyntaxKind.Identifier ||
@@ -54,19 +60,16 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				}
 
 				const messageId = prop.name.text;
-				const existing = unusedMessageIds.get(messageId);
-				if (existing) {
-					existing.push(getTSNodeRange(prop.name, sourceFile));
-					unusedMessageIds.set(messageId, existing);
-				} else {
-					unusedMessageIds.set(messageId, [
+				if (!unusedMessageIds.has(messageId)) {
+					unusedMessageIds.set(
+						messageId,
 						getTSNodeRange(prop.name, sourceFile),
-					]);
+					);
 				}
 			}
 		}
 
-		function cleanupMessageId(node: AST.CallExpression) {
+		function detectMessageIdUsage(node: AST.CallExpression) {
 			if (!unusedMessageIds.size) {
 				return;
 			}
@@ -77,19 +80,13 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			const properties = args.properties;
-			const messageProperty = properties.find((prop) => {
-				return (
-					prop.kind === SyntaxKind.PropertyAssignment &&
-					prop.name.kind === SyntaxKind.Identifier &&
-					prop.name.text === "message"
-				);
-			});
+			const messageProperty = findProperty(
+				args.properties,
+				"message",
+				(node) => node.kind === SyntaxKind.StringLiteral,
+			);
 
-			if (
-				messageProperty?.kind !== SyntaxKind.PropertyAssignment ||
-				messageProperty.initializer.kind !== SyntaxKind.StringLiteral
-			) {
+			if (!messageProperty) {
 				// TODO: It might be async template literal or other expression
 				// In the case we can't determine the message ID here
 				// So don't report any unused message IDs in this file
@@ -97,7 +94,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			unusedMessageIds.delete(messageProperty.initializer.text);
+			unusedMessageIds.delete(messageProperty.text);
 		}
 
 		return {
@@ -109,7 +106,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					}
 
 					if (isRuleContextReport(node, typeChecker)) {
-						cleanupMessageId(node);
+						detectMessageIdUsage(node);
 						return;
 					}
 				},
@@ -118,16 +115,14 @@ export default ruleCreator.createRule(typescriptLanguage, {
 						return;
 					}
 
-					for (const [messageId, ranges] of unusedMessageIds) {
-						for (const range of ranges) {
-							context.report({
-								data: {
-									messageId,
-								},
-								message: "unusedMessageIds",
-								range,
-							});
-						}
+					for (const [messageId, range] of unusedMessageIds) {
+						context.report({
+							data: {
+								messageId,
+							},
+							message: "unusedMessageIds",
+							range,
+						});
 					}
 
 					unusedMessageIds.clear();

@@ -53,8 +53,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 			for (const prop of messagesProperty.properties) {
 				if (
 					prop.kind !== SyntaxKind.PropertyAssignment ||
-					prop.name.kind !== SyntaxKind.Identifier ||
-					prop.initializer.kind !== SyntaxKind.ObjectLiteralExpression
+					prop.name.kind !== SyntaxKind.Identifier
 				) {
 					continue;
 				}

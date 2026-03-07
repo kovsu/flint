@@ -605,6 +605,9 @@ importers:
       '@flint.fyi/comparisons':
         specifier: workspace:^
         version: link:../comparisons
+      '@flint.fyi/core':
+        specifier: workspace:^
+        version: link:../core
       '@flint.fyi/jsx':
         specifier: workspace:^
         version: link:../jsx
@@ -617,9 +620,15 @@ importers:
       '@flint.fyi/plugin-flint':
         specifier: workspace:^
         version: link:../plugin-flint
+      '@flint.fyi/rule-tester':
+        specifier: workspace:^
+        version: link:../rule-tester
       '@flint.fyi/spelling':
         specifier: workspace:^
         version: link:../spelling
+      '@flint.fyi/typescript-language':
+        specifier: workspace:^
+        version: link:../typescript-language
       '@konami-emoji-blast/astro':
         specifier: ^0.2.0
         version: 0.2.0(astro@5.18.0(@types/node@24.11.0)(jiti@2.6.1)(rollup@4.59.0)(typescript@5.9.3)(yaml@2.8.2))(konami-emoji-blast@0.6.0)
@@ -662,6 +671,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.4(react@19.2.4)
+      remark-add-twoslash:
+        specifier: ^0.0.1
+        version: 0.0.1
       remark-custom-heading-id:
         specifier: ^2.0.0
         version: 2.0.0
@@ -687,6 +699,9 @@ importers:
       sharp:
         specifier: 0.34.5
         version: 0.34.5
+      zod:
+        specifier: ^4.2.1
+        version: 4.3.6
 
   packages/solid:
     dependencies:
@@ -4962,6 +4977,10 @@ packages:
 
   rehype@13.0.2:
     resolution: {integrity: sha512-j31mdaRFrwFRUIlxGeuPXXKWQxet52RBQRvCmzl5eCefn/KGbomK5GMHNMsOJf55fgo3qw5tST5neDuarDYR2A==}
+
+  remark-add-twoslash@0.0.1:
+    resolution: {integrity: sha512-RUO0y7PNsMea5mzApPEG9xXYYSAJ+glDrVuYOxvTNG+KQ2/UqcBzglf2XrgJOSuobB27GrnCCBwDBf6UUBBEZQ==}
+    engines: {node: '>=20.19.0'}
 
   remark-custom-heading-id@2.0.0:
     resolution: {integrity: sha512-LpR+c4pmuBGG/zhNbebecDnpKyXU4B7bdNu6tXW83T3QWlkwUpHYyUR8uXQ/BERK9HlI5pXGLu7DjkIS07/iVQ==}
@@ -10733,6 +10752,12 @@ snapshots:
       rehype-parse: 9.0.1
       rehype-stringify: 10.0.1
       unified: 11.0.5
+
+  remark-add-twoslash@0.0.1:
+    dependencies:
+      '@types/mdast': 4.0.4
+      unist-util-visit: 5.1.0
+      vfile: 6.0.3
 
   remark-custom-heading-id@2.0.0:
     dependencies:

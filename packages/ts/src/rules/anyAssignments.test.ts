@@ -299,5 +299,39 @@ const bar: any = 1;
 const foo: Foo = { bar };
 `,
 		`const [{ [\`x\${1}\`]: x }] = [{ [\`x\`]: 1 }] as [{ [\`x\`]: any }];`,
+		{
+			code: `
+import { debugForFile } from "debug-for-file";
+
+const log = debugForFile(import.meta.filename);
+`,
+			files: {
+				"tsconfig.json": `{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"types": ["node"]
+	}
+}`,
+			},
+		},
+		{
+			code: `
+import { debugForFile } from "debug-for-file";
+
+const log: string = debugForFile(import.meta.filename);
+`,
+			files: {
+				"tsconfig.json": `{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"types": ["node"]
+	}
+}`,
+			},
+		},
 	],
 });

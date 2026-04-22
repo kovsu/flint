@@ -12,7 +12,6 @@ import type * as AST from "../types/ast.ts";
 export interface ExtractedDirective {
 	range: NormalizedReportRangeObject;
 	selection: string;
-	targetLine?: number | undefined;
 	type: string;
 }
 
@@ -33,7 +32,7 @@ export function extractDirectivesFromTypeScriptFile(
 			end: sourceRange.end,
 		};
 
-		const range = normalizeRange(commentRange, sourceFile);
+		let range = normalizeRange(commentRange, sourceFile);
 		const matches = match.slice(1);
 		const type = nullThrows(
 			matches[0],
@@ -41,12 +40,11 @@ export function extractDirectivesFromTypeScriptFile(
 		);
 		const selection = matches[1] ?? "";
 
-		const targetLine =
-			type === "disable-next-line"
-				? computeTargetLine(sourceFile, range.begin.line)
-				: undefined;
+		if (type === "disable-next-line") {
+			range = extendRangeToNextCodeLine(sourceFile, range);
+		}
 
-		directives.push({ range, selection, targetLine, type });
+		directives.push({ range, selection, type });
 	});
 
 	return directives;
@@ -57,24 +55,19 @@ export function parseDirectivesFromTypeScriptFile(sourceFile: AST.SourceFile) {
 		sourceFile.statements.at(0)?.getStart(sourceFile) ?? sourceFile.text.length,
 	);
 
-	for (const {
-		range,
-		selection,
-		targetLine,
-		type,
-	} of extractDirectivesFromTypeScriptFile(sourceFile)) {
-		collector.add(
-			range,
-			selection,
-			type,
-			targetLine != null ? { targetLine } : undefined,
-		);
+	for (const { range, selection, type } of extractDirectivesFromTypeScriptFile(
+		sourceFile,
+	)) {
+		collector.add(range, selection, type);
 	}
 
 	return collector.collect();
 }
 
-function computeTargetLine(sourceFile: AST.SourceFile, directiveLine: number) {
+function computeNextCodeLine(
+	sourceFile: AST.SourceFile,
+	directiveLine: number,
+) {
 	const lineStarts = sourceFile.getLineStarts();
 	const nextLineStart = lineStarts[directiveLine + 1];
 
@@ -82,9 +75,9 @@ function computeTargetLine(sourceFile: AST.SourceFile, directiveLine: number) {
 		return undefined;
 	}
 
+	// Skip comments and whitespace to find the first token on the next line
 	const scanner = ts.createScanner(
 		sourceFile.languageVersion,
-		// Skip comments and whitespace to find the first token on the next line
 		true,
 		sourceFile.languageVariant,
 		sourceFile.text,
@@ -100,18 +93,47 @@ function computeTargetLine(sourceFile: AST.SourceFile, directiveLine: number) {
 	}
 
 	const tokenPos = scanner.getTokenStart();
-	const targetLine = sourceFile.getLineAndCharacterOfPosition(tokenPos).line;
+	const codeLine = sourceFile.getLineAndCharacterOfPosition(tokenPos).line;
 
-	for (let line = directiveLine + 1; line < targetLine; line++) {
+	for (let line = directiveLine + 1; line < codeLine; line++) {
 		const start = lineStarts[line];
 		const end = lineStarts[line + 1] ?? sourceFile.text.length;
 
 		// If there is an empty line between the directive and the target line,
-		// `targetLine` should be undefined
+		// the directive should keep its default next-line behavior.
 		if (sourceFile.text.slice(start, end).trim() === "") {
 			return undefined;
 		}
 	}
 
-	return targetLine;
+	return codeLine;
+}
+
+function extendRangeToNextCodeLine(
+	sourceFile: AST.SourceFile,
+	range: NormalizedReportRangeObject,
+) {
+	const codeLine = computeNextCodeLine(sourceFile, range.begin.line);
+
+	if (codeLine === undefined || codeLine <= range.end.line + 1) {
+		return range;
+	}
+
+	const lineStarts = sourceFile.getLineStarts();
+	const endPosition =
+		nullThrows(
+			lineStarts[codeLine],
+			"Code line start is expected to be present by the computed code line",
+		) - 1;
+	const { character, line } =
+		sourceFile.getLineAndCharacterOfPosition(endPosition);
+
+	return {
+		...range,
+		end: {
+			column: character,
+			line,
+			raw: endPosition,
+		},
+	};
 }

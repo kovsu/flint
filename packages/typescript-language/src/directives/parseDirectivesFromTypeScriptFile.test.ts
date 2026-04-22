@@ -121,17 +121,17 @@ function createSourceFile(content: string) {
 }
 
 describe(extractDirectivesFromTypeScriptFile, () => {
-	it("sets targetLine to the next line when no comments intervene", () => {
+	it("leaves range on the directive line when no comments intervene", () => {
 		const sourceFile = createSourceFile(
 			["// flint-disable-next-line a", "const x = 1;"].join("\n"),
 		);
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(1);
+		expect(directives[0]?.range.end.line).toBe(0);
 	});
 
-	it("skips single-line comments to find the code line", () => {
+	it("extends range over single-line comments before the code line", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -142,10 +142,10 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(2);
+		expect(directives[0]?.range.end.line).toBe(1);
 	});
 
-	it("skips single-line block comments to find the code line", () => {
+	it("extends range over single-line block comments before the code line", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -156,10 +156,10 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(2);
+		expect(directives[0]?.range.end.line).toBe(1);
 	});
 
-	it("skips multi-line block comments to find the code line", () => {
+	it("extends range over multi-line block comments before the code line", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -171,25 +171,25 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(3);
+		expect(directives[0]?.range.end.line).toBe(2);
 	});
 
-	it("returns undefined targetLine when an empty line is encountered", () => {
+	it("does not extend range when an empty line is encountered", () => {
 		const sourceFile = createSourceFile(
 			["// flint-disable-next-line a", "", "const x = 1;"].join("\n"),
 		);
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBeUndefined();
+		expect(directives[0]?.range.end.line).toBe(0);
 	});
 
-	it("returns undefined targetLine when the directive is at end of file", () => {
+	it("does not extend range when the directive is at end of file", () => {
 		const sourceFile = createSourceFile("// flint-disable-next-line a");
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBeUndefined();
+		expect(directives[0]?.range.end.line).toBe(0);
 	});
 
 	it("treats a line with a block comment followed by code as a code line", () => {
@@ -199,7 +199,7 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(1);
+		expect(directives[0]?.range.end.line).toBe(0);
 	});
 
 	it("treats a line with multiple block comments followed by code as a code line", () => {
@@ -211,10 +211,10 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(1);
+		expect(directives[0]?.range.end.line).toBe(0);
 	});
 
-	it("skips comment lines to find block comment + code line", () => {
+	it("extends range over comment lines before block comment + code line", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -225,7 +225,7 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(2);
+		expect(directives[0]?.range.end.line).toBe(1);
 	});
 
 	it("targets the closing line of a multi-line block comment when it contains code", () => {
@@ -237,10 +237,10 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(2);
+		expect(directives[0]?.range.end.line).toBe(1);
 	});
 
-	it("skips a line where block comment remainder is a line comment", () => {
+	it("extends range over a line where block comment remainder is a line comment", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -251,10 +251,10 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(2);
+		expect(directives[0]?.range.end.line).toBe(1);
 	});
 
-	it("skips a multiline block comment closing line followed only by another block comment", () => {
+	it("extends range over a multiline block comment closing line followed only by another block comment", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -266,10 +266,10 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(3);
+		expect(directives[0]?.range.end.line).toBe(2);
 	});
 
-	it("skips a multiline block comment whose closing line chains into another multiline block comment", () => {
+	it("extends range over a multiline block comment whose closing line chains into another multiline block comment", () => {
 		const sourceFile = createSourceFile(
 			[
 				"// flint-disable-next-line a",
@@ -282,16 +282,16 @@ describe(extractDirectivesFromTypeScriptFile, () => {
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBe(4);
+		expect(directives[0]?.range.end.line).toBe(3);
 	});
 
-	it("does not set targetLine for non-disable-next-line directives", () => {
+	it("does not extend range for non-disable-next-line directives", () => {
 		const sourceFile = createSourceFile(
 			["// flint-disable-file a", "const x = 1;"].join("\n"),
 		);
 
 		const directives = extractDirectivesFromTypeScriptFile(sourceFile);
 
-		expect(directives[0]?.targetLine).toBeUndefined();
+		expect(directives[0]?.range.end.line).toBe(0);
 	});
 });

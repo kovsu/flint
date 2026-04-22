@@ -1,6 +1,6 @@
 import type { CommentDirectiveWithinFile } from "../types/directives.ts";
 import { createSelectionMatcher } from "./createSelectionMatcher.ts";
-import { resolveTargetLine } from "./resolveTargetLine.ts";
+import { getDisableNextLineRange } from "./getDisableNextLineRange.ts";
 
 export interface RangedSelection {
 	lines: RangedSelectionLines;
@@ -138,17 +138,17 @@ function directivesToEvents(directives: CommentDirectiveWithinFile[]) {
 				break;
 			}
 			case "disable-next-line": {
-				const targetLine = resolveTargetLine(directive);
+				const range = getDisableNextLineRange(directive);
 				events.push(
 					{
 						action: "on",
-						line: targetLine,
+						line: range.begin,
 						raw: directive.range.begin.raw,
 						selections: directive.selections,
 					},
 					{
 						action: "off",
-						line: targetLine + 1,
+						line: range.end + 1,
 						raw: directive.range.begin.raw,
 						selections: directive.selections,
 					},

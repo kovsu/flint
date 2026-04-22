@@ -3,6 +3,21 @@ import { describe, expect, it } from "vitest";
 import type { FileReport } from "../types/reports.ts";
 import { DirectivesFilterer } from "./DirectivesFilterer.ts";
 
+function createDirectiveRange(beginLine: number, endLine = beginLine) {
+	return {
+		begin: {
+			column: 0,
+			line: beginLine,
+			raw: beginLine,
+		},
+		end: {
+			column: 0,
+			line: endLine,
+			raw: endLine,
+		},
+	};
+}
+
 function createReport(forLine: number, id: string) {
 	return {
 		about: { id },
@@ -100,6 +115,27 @@ describe(DirectivesFilterer, () => {
 
 			expect(actual).toEqual({
 				reports: [reports[0]],
+				unusedDirectives: [],
+			});
+		});
+
+		it("suppresses reports on comment lines before an extended disable-next-line target", () => {
+			const filterer = new DirectivesFilterer();
+
+			filterer.add([
+				{
+					range: createDirectiveRange(0, 1),
+					selections: ["example"],
+					type: "disable-next-line",
+				},
+			]);
+
+			const reports = [createReport(1, "example"), createReport(2, "example")];
+
+			const actual = filterer.filter(reports);
+
+			expect(actual).toEqual({
+				reports: [],
 				unusedDirectives: [],
 			});
 		});
@@ -381,26 +417,18 @@ describe(DirectivesFilterer, () => {
 			});
 		});
 
-		it("suppresses reports for multiple disable-next-line directives on the same target line", () => {
+		it("suppresses reports for multiple disable-next-line directives on the same extended line", () => {
 			const filterer = new DirectivesFilterer();
 
 			const aaaDirective = {
-				range: {
-					begin: { column: 0, line: 0, raw: 0 },
-					end: { column: 0, line: 0, raw: 0 },
-				},
+				range: createDirectiveRange(0, 2),
 				selections: ["aaa"],
-				targetLine: 3,
 				type: "disable-next-line" as const,
 			};
 
 			const bbbDirective = {
-				range: {
-					begin: { column: 0, line: 1, raw: 1 },
-					end: { column: 0, line: 1, raw: 1 },
-				},
+				range: createDirectiveRange(1, 2),
 				selections: ["bbb"],
-				targetLine: 3,
 				type: "disable-next-line" as const,
 			};
 
@@ -414,25 +442,18 @@ describe(DirectivesFilterer, () => {
 			});
 		});
 
-		it("marks begin directives as used when their active selections suppress a disable-next-line target", () => {
+		it("marks begin directives as used when their active selections suppress an extended disable-next-line target", () => {
 			const filterer = new DirectivesFilterer();
 
 			const beginDirective = {
-				range: {
-					begin: { column: 0, line: 0, raw: 0 },
-					end: { column: 0, line: 0, raw: 0 },
-				},
+				range: createDirectiveRange(0),
 				selections: ["aaa"],
 				type: "disable-lines-begin" as const,
 			};
 
 			const nextLineDirective = {
-				range: {
-					begin: { column: 0, line: 1, raw: 1 },
-					end: { column: 0, line: 1, raw: 1 },
-				},
+				range: createDirectiveRange(1, 3),
 				selections: ["bbb"],
-				targetLine: 4,
 				type: "disable-next-line" as const,
 			};
 

@@ -8,8 +8,8 @@ import {
 	type RangedSelection,
 } from "./computeDirectiveRanges.ts";
 import { createSelectionMatcher } from "./createSelectionMatcher.ts";
+import { getDisableNextLineRange } from "./getDisableNextLineRange.ts";
 import { isCommentDirectiveWithinFile } from "./predicates.ts";
-import { resolveTargetLine } from "./resolveTargetLine.ts";
 import { selectionMatchesDirectiveRanges } from "./selectionMatchesDirectiveRanges.ts";
 import { selectionMatchesReport } from "./selectionMatchesReport.ts";
 
@@ -254,8 +254,11 @@ function isDirectiveInRange(
 		return false;
 	}
 
-	const targetLine = resolveTargetLine(directive);
-	return targetLine >= range.lines.begin && targetLine <= range.lines.end;
+	const nextLineRange = getDisableNextLineRange(directive);
+	return (
+		nextLineRange.begin <= range.lines.end &&
+		nextLineRange.end >= range.lines.begin
+	);
 }
 
 function rangeContainsReport(range: RangedSelection, report: FileReport) {

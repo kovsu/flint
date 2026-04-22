@@ -6,9 +6,9 @@ import type {
 	FileReport,
 	NormalizedReportRangeObject,
 } from "../types/reports.ts";
+import { getDisableNextLineRange } from "./getDisableNextLineRange.ts";
 import { isCommentDirectiveType } from "./predicates.ts";
 import { directiveReports } from "./reports/directiveReports.ts";
-import { resolveTargetLine } from "./resolveTargetLine.ts";
 
 export class DirectivesCollector {
 	#directives: CommentDirective[] = [];
@@ -22,12 +22,7 @@ export class DirectivesCollector {
 		this.#statementsStartIndex = firstStatementIndex;
 	}
 
-	add(
-		range: NormalizedReportRangeObject,
-		selection: string,
-		type: string,
-		options?: { targetLine?: number },
-	) {
+	add(range: NormalizedReportRangeObject, selection: string, type: string) {
 		if (!isCommentDirectiveType(type)) {
 			this.#reports.push(directiveReports.createUnknown(type, range));
 			return;
@@ -39,7 +34,7 @@ export class DirectivesCollector {
 		}
 
 		const selections = [
-			// <flint-directive> a a b  => ["a", "b"]
+			// <flint-directive> a a b => ["a", "b"]
 			...new Set(
 				selection
 					.trim()
@@ -51,7 +46,6 @@ export class DirectivesCollector {
 			range,
 			selections,
 			type,
-			...options,
 		};
 
 		this.#directives.push(directive);
@@ -99,10 +93,7 @@ export class DirectivesCollector {
 		);
 
 		for (const directive of nextLineDirectives) {
-			const effectiveTarget = resolveTargetLine(directive);
-
-			// For `disable-next-line` directive
-			// Check if it has already been disabled by `disable-lines-begin` directive
+			const effectiveTarget = getDisableNextLineRange(directive).end;
 			const activeAtTarget = new Set();
 
 			for (const bed of beginEndDirectives) {

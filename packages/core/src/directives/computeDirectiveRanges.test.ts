@@ -2,17 +2,17 @@ import { describe, expect, it } from "vitest";
 
 import { computeDirectiveRanges } from "./computeDirectiveRanges.ts";
 
-function createDirectiveRange(forLine: number) {
+function createDirectiveRange(beginLine: number, endLine = beginLine) {
 	return {
 		begin: {
 			column: 0,
-			line: forLine,
-			raw: 0,
+			line: beginLine,
+			raw: beginLine,
 		},
 		end: {
 			column: 1,
-			line: forLine,
-			raw: 1,
+			line: endLine,
+			raw: endLine,
 		},
 	};
 }
@@ -159,12 +159,11 @@ describe(computeDirectiveRanges, () => {
 		]);
 	});
 
-	it("uses an explicit target line for disable-next-line ranges", () => {
+	it("uses range.end.line to extend disable-next-line ranges", () => {
 		const actual = computeDirectiveRanges([
 			{
-				range: createDirectiveRange(1),
+				range: createDirectiveRange(1, 3),
 				selections: ["aaa"],
-				targetLine: 4,
 				type: "disable-next-line",
 			},
 		]);
@@ -172,7 +171,7 @@ describe(computeDirectiveRanges, () => {
 		expect(actual).toEqual([
 			{
 				lines: {
-					begin: 4,
+					begin: 2,
 					end: 4,
 				},
 				selections: [/^aaa$/],
@@ -180,7 +179,7 @@ describe(computeDirectiveRanges, () => {
 		]);
 	});
 
-	it("applies intervening range changes before a disable-next-line target line", () => {
+	it("applies intervening range changes inside an extended disable-next-line range", () => {
 		const actual = computeDirectiveRanges([
 			{
 				range: createDirectiveRange(0),
@@ -188,9 +187,8 @@ describe(computeDirectiveRanges, () => {
 				type: "disable-lines-begin",
 			},
 			{
-				range: createDirectiveRange(1),
+				range: createDirectiveRange(1, 3),
 				selections: ["bbb"],
-				targetLine: 4,
 				type: "disable-next-line",
 			},
 			{
@@ -202,17 +200,21 @@ describe(computeDirectiveRanges, () => {
 
 		expect(actual).toEqual([
 			{
-				lines: { begin: 1, end: 2 },
+				lines: { begin: 1, end: 1 },
 				selections: [/^aaa$/],
 			},
 			{
-				lines: { begin: 4, end: 4 },
+				lines: { begin: 2, end: 2 },
+				selections: [/^aaa$/, /^bbb$/],
+			},
+			{
+				lines: { begin: 3, end: 4 },
 				selections: [/^bbb$/],
 			},
 		]);
 	});
 
-	it("merges a disable-next-line target into an active begin block", () => {
+	it("merges an extended disable-next-line range into an active begin block", () => {
 		const actual = computeDirectiveRanges([
 			{
 				range: createDirectiveRange(0),
@@ -220,9 +222,8 @@ describe(computeDirectiveRanges, () => {
 				type: "disable-lines-begin",
 			},
 			{
-				range: createDirectiveRange(1),
+				range: createDirectiveRange(1, 2),
 				selections: ["bbb"],
-				targetLine: 3,
 				type: "disable-next-line",
 			},
 			{
@@ -234,11 +235,11 @@ describe(computeDirectiveRanges, () => {
 
 		expect(actual).toEqual([
 			{
-				lines: { begin: 1, end: 2 },
+				lines: { begin: 1, end: 1 },
 				selections: [/^aaa$/],
 			},
 			{
-				lines: { begin: 3, end: 3 },
+				lines: { begin: 2, end: 3 },
 				selections: [/^aaa$/, /^bbb$/],
 			},
 			{
@@ -248,44 +249,28 @@ describe(computeDirectiveRanges, () => {
 		]);
 	});
 
-	it("merges disable-next-line directives that share a target line", () => {
+	it("merges disable-next-line directives that share extended range lines", () => {
 		const actual = computeDirectiveRanges([
 			{
-				range: createDirectiveRange(0),
+				range: createDirectiveRange(0, 2),
 				selections: ["aaa"],
-				targetLine: 3,
 				type: "disable-next-line",
 			},
 			{
-				range: createDirectiveRange(1),
+				range: createDirectiveRange(1, 2),
 				selections: ["bbb"],
-				targetLine: 3,
 				type: "disable-next-line",
 			},
 		]);
 
 		expect(actual).toEqual([
 			{
-				lines: { begin: 3, end: 3 },
-				selections: [/^aaa$/, /^bbb$/],
-			},
-		]);
-	});
-
-	it("does not allow disable-next-line ranges to start before the directive", () => {
-		const actual = computeDirectiveRanges([
-			{
-				range: createDirectiveRange(10),
-				selections: ["aaa"],
-				targetLine: 4,
-				type: "disable-next-line",
-			},
-		]);
-
-		expect(actual).toEqual([
-			{
-				lines: { begin: 11, end: 11 },
+				lines: { begin: 1, end: 1 },
 				selections: [/^aaa$/],
+			},
+			{
+				lines: { begin: 2, end: 3 },
+				selections: [/^aaa$/, /^bbb$/],
 			},
 		]);
 	});
@@ -401,13 +386,10 @@ describe(computeDirectiveRanges, () => {
 		]);
 	});
 
-	it("uses range.end.line for fallback when targetLine is not set", () => {
+	it("uses range.end.line as the last disable-next-line range boundary", () => {
 		const actual = computeDirectiveRanges([
 			{
-				range: {
-					begin: { column: 0, line: 5, raw: 0 },
-					end: { column: 0, line: 7, raw: 0 },
-				},
+				range: createDirectiveRange(5, 7),
 				selections: ["aaa"],
 				type: "disable-next-line",
 			},
@@ -415,7 +397,7 @@ describe(computeDirectiveRanges, () => {
 
 		expect(actual).toEqual([
 			{
-				lines: { begin: 8, end: 8 },
+				lines: { begin: 6, end: 8 },
 				selections: [/^aaa$/],
 			},
 		]);

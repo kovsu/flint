@@ -4,16 +4,16 @@ import type { NormalizedReportRangeObject } from "../types/reports.ts";
 import { DirectivesCollector } from "./DirectivesCollector.ts";
 import { directiveReports } from "./reports/directiveReports.ts";
 
-function createRange(forPosition: number) {
+function createRange(forPosition: number, beginLine = 0, endLine = 1) {
 	return {
 		begin: {
 			column: 0,
-			line: 0,
+			line: beginLine,
 			raw: forPosition,
 		},
 		end: {
 			column: 0,
-			line: 1,
+			line: endLine,
 			raw: forPosition + 1,
 		},
 	} satisfies NormalizedReportRangeObject;
@@ -312,67 +312,22 @@ describe(DirectivesCollector, () => {
 			});
 		});
 
-		it("stores an explicit target line on disable-next-line directives", () => {
-			const collector = new DirectivesCollector(2);
-			const range = createRange(1);
-
-			collector.add(range, "a", "disable-next-line", { targetLine: 4 });
-
-			const actual = collector.collect();
-
-			expect(actual).toEqual({
-				directives: [
-					{
-						range,
-						selections: ["a"],
-						targetLine: 4,
-						type: "disable-next-line",
-					},
-				],
-				reports: [],
-			});
-		});
-
-		it("does not report already disabled for multiple disable-next-line directives sharing a target line", () => {
+		it("does not report already disabled for multiple disable-next-line directives sharing an extended line", () => {
 			const collector = new DirectivesCollector(0);
 
-			collector.add(
-				{
-					begin: { column: 0, line: 0, raw: 0 },
-					end: { column: 1, line: 0, raw: 1 },
-				},
-				"aaa",
-				"disable-next-line",
-				{ targetLine: 3 },
-			);
-			collector.add(
-				{
-					begin: { column: 0, line: 1, raw: 2 },
-					end: { column: 1, line: 1, raw: 3 },
-				},
-				"aaa",
-				"disable-next-line",
-				{ targetLine: 3 },
-			);
+			collector.add(createRange(0, 0, 2), "aaa", "disable-next-line");
+			collector.add(createRange(2, 1, 2), "aaa", "disable-next-line");
 
 			expect(collector.collect()).toEqual({
 				directives: [
 					{
-						range: {
-							begin: { column: 0, line: 0, raw: 0 },
-							end: { column: 1, line: 0, raw: 1 },
-						},
+						range: createRange(0, 0, 2),
 						selections: ["aaa"],
-						targetLine: 3,
 						type: "disable-next-line",
 					},
 					{
-						range: {
-							begin: { column: 0, line: 1, raw: 2 },
-							end: { column: 1, line: 1, raw: 3 },
-						},
+						range: createRange(2, 1, 2),
 						selections: ["aaa"],
-						targetLine: 3,
 						type: "disable-next-line",
 					},
 				],
@@ -383,29 +338,14 @@ describe(DirectivesCollector, () => {
 		it("validates newly added deferred directives on a subsequent collect() after more add() calls", () => {
 			const collector = new DirectivesCollector(0);
 
-			collector.add(
-				{
-					begin: { column: 0, line: 0, raw: 0 },
-					end: { column: 1, line: 0, raw: 1 },
-				},
-				"aaa",
-				"disable-lines-begin",
-			);
+			collector.add(createRange(0, 0, 0), "aaa", "disable-lines-begin");
 
 			// First collect — no deferred next-line directives yet
 			const first = collector.collect();
 			expect(first.reports).toHaveLength(0);
 
 			// Add a deferred next-line that overlaps with the begin
-			collector.add(
-				{
-					begin: { column: 0, line: 2, raw: 4 },
-					end: { column: 1, line: 2, raw: 5 },
-				},
-				"aaa",
-				"disable-next-line",
-				{ targetLine: 5 },
-			);
+			collector.add(createRange(4, 2, 4), "aaa", "disable-next-line");
 
 			// Second collect — must pick up the new deferred directive
 			const second = collector.collect();
@@ -416,29 +356,14 @@ describe(DirectivesCollector, () => {
 			const collector = new DirectivesCollector(0);
 
 			// Add a deferred next-line targeting line 5
-			collector.add(
-				{
-					begin: { column: 0, line: 0, raw: 0 },
-					end: { column: 1, line: 0, raw: 1 },
-				},
-				"aaa",
-				"disable-next-line",
-				{ targetLine: 5 },
-			);
+			collector.add(createRange(0, 0, 4), "aaa", "disable-next-line");
 
 			// First collect — no begin block yet, so 0 reports
 			const first = collector.collect();
 			expect(first.reports).toHaveLength(0);
 
 			// Add a begin that covers line 5
-			collector.add(
-				{
-					begin: { column: 0, line: 3, raw: 6 },
-					end: { column: 1, line: 3, raw: 7 },
-				},
-				"aaa",
-				"disable-lines-begin",
-			);
+			collector.add(createRange(6, 3, 3), "aaa", "disable-lines-begin");
 
 			// Second collect — line 5 is now covered by the begin, should report alreadyDisabled
 			const second = collector.collect();
@@ -448,56 +373,24 @@ describe(DirectivesCollector, () => {
 		it("does not report already disabled when an intervening end closes the selection before the target line", () => {
 			const collector = new DirectivesCollector(0);
 
-			collector.add(
-				{
-					begin: { column: 0, line: 0, raw: 0 },
-					end: { column: 1, line: 0, raw: 1 },
-				},
-				"aaa",
-				"disable-lines-begin",
-			);
-			collector.add(
-				{
-					begin: { column: 0, line: 1, raw: 2 },
-					end: { column: 1, line: 1, raw: 3 },
-				},
-				"aaa",
-				"disable-next-line",
-				{ targetLine: 4 },
-			);
-			collector.add(
-				{
-					begin: { column: 0, line: 2, raw: 4 },
-					end: { column: 1, line: 2, raw: 5 },
-				},
-				"aaa",
-				"disable-lines-end",
-			);
+			collector.add(createRange(0, 0, 0), "aaa", "disable-lines-begin");
+			collector.add(createRange(2, 1, 3), "aaa", "disable-next-line");
+			collector.add(createRange(4, 2, 2), "aaa", "disable-lines-end");
 
 			expect(collector.collect()).toEqual({
 				directives: [
 					{
-						range: {
-							begin: { column: 0, line: 0, raw: 0 },
-							end: { column: 1, line: 0, raw: 1 },
-						},
+						range: createRange(0, 0, 0),
 						selections: ["aaa"],
 						type: "disable-lines-begin",
 					},
 					{
-						range: {
-							begin: { column: 0, line: 1, raw: 2 },
-							end: { column: 1, line: 1, raw: 3 },
-						},
+						range: createRange(2, 1, 3),
 						selections: ["aaa"],
-						targetLine: 4,
 						type: "disable-next-line",
 					},
 					{
-						range: {
-							begin: { column: 0, line: 2, raw: 4 },
-							end: { column: 1, line: 2, raw: 5 },
-						},
+						range: createRange(4, 2, 2),
 						selections: ["aaa"],
 						type: "disable-lines-end",
 					},

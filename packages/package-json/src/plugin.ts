@@ -1,6 +1,7 @@
 import { createPlugin } from "@flint.fyi/core";
 
 import { directPropertyValidityRules } from "./directPropertyValidityRules.ts";
+import binNameCasing from "./rules/binNameCasing.ts";
 
 export const packageJson = createPlugin({
 	files: {
@@ -9,6 +10,7 @@ export const packageJson = createPlugin({
 	name: "PackageJSON",
 	rules: [
 		// TODO: More rules to come very soon!
+		binNameCasing,
 		...Object.values(directPropertyValidityRules),
 	],
 });

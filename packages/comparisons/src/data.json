@@ -899,9 +899,10 @@
 			}
 		],
 		"flint": {
-			"name": "testCaseOnlies",
+			"name": "testCaseOnlyFlags",
 			"plugin": "flint",
-			"preset": "logical"
+			"preset": "logical",
+			"status": "implemented"
 		}
 	},
 	{
@@ -21409,7 +21410,7 @@
 			}
 		],
 		"flint": {
-			"name": "testCaseOnlies",
+			"name": "testCaseOnlyFlags",
 			"plugin": "vitest",
 			"status": "skipped"
 		},

@@ -16,10 +16,22 @@ ruleTester.describe(rule, {
 	"bin": {
 		"invalidCommand": "./bin/cli.js"
 		~~~~~~~~~~~~~~~~
-		Command name \`invalidCommand\` should be in kebab case.
+		Prefer the standard kebab-case style for \`bin\` commands.
 	}
 }
 `,
+			suggestions: [
+				{
+					id: "convertToKebabCase",
+					updated: `
+{
+	"bin": {
+		"invalid-command": "./bin/cli.js"
+	}
+}
+`,
+				},
+			],
 		},
 		{
 			code: `
@@ -36,10 +48,23 @@ ruleTester.describe(rule, {
 		"valid-command": "./bin/valid.js",
 		"anotherInvalidCommand": "./bin/invalid.js"
 		~~~~~~~~~~~~~~~~~~~~~~~
-		Command name \`anotherInvalidCommand\` should be in kebab case.
+		Prefer the standard kebab-case style for \`bin\` commands.
 	}
 }
 `,
+			suggestions: [
+				{
+					id: "convertToKebabCase",
+					updated: `
+{
+	"bin": {
+		"valid-command": "./bin/valid.js",
+		"another-invalid-command": "./bin/invalid.js"
+	}
+}
+`,
+				},
+			],
 		},
 	],
 	valid: [

@@ -15,12 +15,12 @@ export default ruleCreator.createRule(jsonLanguage, {
 	},
 	messages: {
 		invalidCase: {
-			primary: "Command name `{{ property }}` should be in kebab case.",
+			primary: "Prefer the standard kebab-case style for `bin` commands.",
 			secondary: [
 				"The keys in an object-form package.json `bin` field become command names for installed package executables.",
 				"Kebab-case command names are the standard convention for CLI executables.",
 			],
-			suggestions: ["Convert `{{ property }}` to kebab case."],
+			suggestions: ["Convert the command name to kebab case."],
 		},
 	},
 	setup(context) {
@@ -50,10 +50,18 @@ export default ruleCreator.createRule(jsonLanguage, {
 								continue;
 							}
 
+							const range = getJsonNodeRange(binProperty.name, sourceFile);
+
 							context.report({
-								data: { property: propertyName },
 								message: "invalidCase",
-								range: getJsonNodeRange(binProperty.name, sourceFile),
+								range,
+								suggestions: [
+									{
+										id: "convertToKebabCase",
+										range,
+										text: JSON.stringify(kebabCasePropertyName),
+									},
+								],
 							});
 						}
 					}

@@ -2,10 +2,8 @@ import { getJsonNodeRange, jsonLanguage } from "@flint.fyi/json-language";
 import { kebabCase } from "change-case";
 import ts from "typescript";
 
-import { getPackagePropertiesOfNames } from "../getPackagePropertiesOfNames.ts";
+import { getPackagePropertyOfName } from "../getPackagePropertyOfName.ts";
 import { ruleCreator } from "../ruleCreator.ts";
-
-const binPropertyNames = new Set(["bin"]);
 
 export default ruleCreator.createRule(jsonLanguage, {
 	about: {
@@ -27,43 +25,42 @@ export default ruleCreator.createRule(jsonLanguage, {
 		return {
 			visitors: {
 				JsonSourceFile(node, { sourceFile }) {
-					for (const initializer of getPackagePropertiesOfNames(
-						node,
-						binPropertyNames,
-					)) {
-						if (initializer.kind !== ts.SyntaxKind.ObjectLiteralExpression) {
+					const property = getPackagePropertyOfName(node, "bin");
+					if (
+						property?.kind !== ts.SyntaxKind.PropertyAssignment ||
+						property.initializer.kind !== ts.SyntaxKind.ObjectLiteralExpression
+					) {
+						return;
+					}
+
+					for (const binProperty of property.initializer.properties) {
+						if (
+							binProperty.kind !== ts.SyntaxKind.PropertyAssignment ||
+							binProperty.name.kind !== ts.SyntaxKind.StringLiteral
+						) {
 							continue;
 						}
 
-						for (const binProperty of initializer.properties) {
-							if (
-								binProperty.kind !== ts.SyntaxKind.PropertyAssignment ||
-								binProperty.name.kind !== ts.SyntaxKind.StringLiteral
-							) {
-								continue;
-							}
+						const propertyName = binProperty.name.text;
+						const kebabCasePropertyName = kebabCase(propertyName);
 
-							const propertyName = binProperty.name.text;
-							const kebabCasePropertyName = kebabCase(propertyName);
-
-							if (propertyName === kebabCasePropertyName) {
-								continue;
-							}
-
-							const range = getJsonNodeRange(binProperty.name, sourceFile);
-
-							context.report({
-								message: "invalidCase",
-								range,
-								suggestions: [
-									{
-										id: "convertToKebabCase",
-										range,
-										text: JSON.stringify(kebabCasePropertyName),
-									},
-								],
-							});
+						if (propertyName === kebabCasePropertyName) {
+							continue;
 						}
+
+						const range = getJsonNodeRange(binProperty.name, sourceFile);
+
+						context.report({
+							message: "invalidCase",
+							range,
+							suggestions: [
+								{
+									id: "convertToKebabCase",
+									range,
+									text: JSON.stringify(kebabCasePropertyName),
+								},
+							],
+						});
 					}
 				},
 			},

@@ -29,6 +29,7 @@
 		"@flint.fyi/core": "workspace:^",
 		"@flint.fyi/json-language": "workspace:^",
 		"@flint.fyi/typescript-language": "workspace:^",
+		"@flint.fyi/utils": "workspace:^",
 		"change-case": "^5.4.4",
 		"package-json-validator": "^1.5.0",
 		"typescript": "^5.9.0 || ^6.0.0",

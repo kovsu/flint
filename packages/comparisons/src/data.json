@@ -4918,6 +4918,7 @@
 		"flint": {
 			"name": "browserValidity",
 			"plugin": "package-json",
+			"preset": "logical",
 			"status": "implemented"
 		}
 	},
@@ -5336,8 +5337,16 @@
 	},
 	{
 		"flint": {
+			"name": "gypfilePresence",
+			"plugin": "package-json",
+			"status": "implemented"
+		}
+	},
+	{
+		"flint": {
 			"name": "gypfileValidity",
 			"plugin": "package-json",
+			"preset": "logical",
 			"status": "implemented"
 		}
 	},
@@ -5398,8 +5407,16 @@
 	},
 	{
 		"flint": {
+			"name": "libcPresence",
+			"plugin": "package-json",
+			"status": "implemented"
+		}
+	},
+	{
+		"flint": {
 			"name": "libcValidity",
 			"plugin": "package-json",
+			"preset": "logical",
 			"status": "implemented"
 		}
 	},
@@ -5645,6 +5662,7 @@
 		"flint": {
 			"name": "peerDependenciesMetaValidity",
 			"plugin": "package-json",
+			"preset": "logical",
 			"status": "implemented"
 		}
 	},

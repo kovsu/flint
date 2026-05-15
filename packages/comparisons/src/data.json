@@ -5251,7 +5251,8 @@
 		"flint": {
 			"name": "exportsSubpathsStyle",
 			"plugin": "package-json",
-			"preset": "stylistic"
+			"preset": "stylistic",
+			"status": "implemented"
 		}
 	},
 	{

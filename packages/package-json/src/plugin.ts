@@ -7,6 +7,7 @@ import binNameCasing from "./rules/binNameCasing.ts";
 import dependencyUniqueness from "./rules/dependencyUniqueness.ts";
 import emptyFields from "./rules/emptyFields.ts";
 import exportsSubpathsStyle from "./rules/exportsSubpathsStyle.ts";
+import peerDependenciesInstallation from "./rules/peerDependenciesInstallation.ts";
 import privatePresence from "./rules/privatePresence.ts";
 import repositoryShorthand from "./rules/repositoryShorthand.ts";
 import scriptsNameCasing from "./rules/scriptsNameCasing.ts";
@@ -22,6 +23,7 @@ export const packageJson = createPlugin({
 		dependencyUniqueness,
 		emptyFields,
 		exportsSubpathsStyle,
+		peerDependenciesInstallation,
 		privatePresence,
 		repositoryShorthand,
 		scriptsNameCasing,

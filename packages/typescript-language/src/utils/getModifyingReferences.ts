@@ -10,9 +10,11 @@ export function getModifyingReferences(
 	sourceFile: AST.SourceFile,
 ) {
 	const variable = getScopeManager(sourceFile).findVariable(identifier);
-	return (
-		variable?.references
-			.filter((reference) => reference.isWrite)
-			.map((reference) => reference.identifier) ?? []
-	);
+	if (!variable || variable.declarations.length > 1) {
+		return [];
+	}
+
+	return variable.references
+		.filter((reference) => reference.isWrite)
+		.map((reference) => reference.identifier);
 }

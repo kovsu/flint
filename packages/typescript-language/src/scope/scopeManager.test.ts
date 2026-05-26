@@ -411,6 +411,7 @@ describe(createScopeManager, () => {
 		// The `cause: error` read should resolve to the catch binding so
 		// that a `caughtErrorCauses` rule can prove the wrap is correct.
 		const causeRead = catchVariable?.references.find((r) => !r.isWrite);
+
 		expect(causeRead).toBeDefined();
 		expect(causeRead?.variable).toBe(catchVariable);
 	});

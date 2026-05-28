@@ -91,6 +91,9 @@ export default ruleCreator.createRule(typescriptLanguage, {
 						assertIdentifierNames.add(node.name.text);
 					}
 				},
+				"SourceFile:exit"() {
+					assertIdentifierNames.clear();
+				},
 			},
 		};
 	},

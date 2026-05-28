@@ -1,7 +1,5 @@
 import { CachedFactory } from "cached-factory";
 import { debugForFile } from "debug-for-file";
-import * as fs from "node:fs/promises";
-import { dirname } from "node:path";
 import omitEmpty from "omit-empty";
 
 import type { CacheStorage } from "../types/cache.ts";
@@ -55,16 +53,12 @@ export async function writeToCache(
 		},
 	};
 
-	const cacheFilePath = getCacheFilePath(cacheLocation);
-	const cacheFileDirectory = dirname(cacheFilePath);
-
-	await fs.mkdir(cacheFileDirectory, { recursive: true });
-
 	const encoded = cacheStorageSchema.safeEncode(storage);
 	if (!encoded.success) {
 		log("Failed to encode cache data: %s", encoded.error.message);
 		return;
 	}
 
-	await fs.writeFile(cacheFilePath, encoded.data);
+	const cacheFilePath = getCacheFilePath(cacheLocation);
+	await host.writeFile(cacheFilePath, encoded.data);
 }

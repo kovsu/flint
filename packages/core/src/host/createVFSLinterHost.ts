@@ -62,6 +62,7 @@ export function createVFSLinterHost(
 	interface VfsFile {
 		content: string;
 		path: string;
+		touchTime: number;
 	}
 
 	const fileMap = new Map<PathKey, VfsFile>();
@@ -128,9 +129,12 @@ export function createVFSLinterHost(
 		async getFileTouchTime(filePath) {
 			return host.getFileTouchTimeSync(filePath);
 		},
-		getFileTouchTimeSync() {
-			// TODO: uhh... this probably doesn't work amazingly
-			return Date.now();
+		getFileTouchTimeSync(filePath) {
+			const file = fileMap.get(pathKey(filePath, caseSensitiveFS));
+			if (file != null) {
+				return file.touchTime;
+			}
+			return baseHost?.getFileTouchTimeSync(filePath) ?? Date.now();
 		},
 		isCaseSensitiveFS() {
 			return caseSensitiveFS;
@@ -210,7 +214,7 @@ export function createVFSLinterHost(
 			const existing = fileMap.get(key);
 			const storedPath = existing?.path ?? normalizePath(filePathAbsolute);
 			const fileEvent = existing != null ? "changed" : "created";
-			fileMap.set(key, { content, path: storedPath });
+			fileMap.set(key, { content, path: storedPath, touchTime: Date.now() });
 			watchEvent(storedPath, fileEvent);
 		},
 		watchDirectorySync(directoryPathAbsolute, callback, options) {

@@ -25,6 +25,7 @@ export interface LinterHost {
 }
 
 export interface LinterHostDirectoryEntry {
+	isSymbolicLink?: boolean;
 	name: string;
 	type: "directory" | "file";
 }

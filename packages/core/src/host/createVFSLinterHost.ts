@@ -125,6 +125,7 @@ export function createVFSLinterHost(
 		getCurrentDirectory() {
 			return cwd;
 		},
+		// flint-disable-next-line ts/asyncFunctionAwaits
 		// eslint-disable-next-line @typescript-eslint/require-await
 		async getFileTouchTime(filePath) {
 			return host.getFileTouchTimeSync(filePath);
@@ -139,6 +140,7 @@ export function createVFSLinterHost(
 		isCaseSensitiveFS() {
 			return caseSensitiveFS;
 		},
+		// flint-disable-next-line ts/asyncFunctionAwaits
 		// eslint-disable-next-line @typescript-eslint/require-await
 		async readDirectory(directoryPathAbsolute) {
 			return host.readDirectorySync(directoryPathAbsolute);
@@ -182,6 +184,7 @@ export function createVFSLinterHost(
 					: []),
 			];
 		},
+		// flint-disable-next-line ts/asyncFunctionAwaits
 		// eslint-disable-next-line @typescript-eslint/require-await
 		async readFile(filePathAbsolute) {
 			return host.readFileSync(filePathAbsolute);
@@ -267,6 +270,7 @@ export function createVFSLinterHost(
 				},
 			};
 		},
+		// flint-disable-next-line ts/asyncFunctionAwaits
 		// eslint-disable-next-line @typescript-eslint/require-await
 		async writeFile(filePathAbsolute, content) {
 			host.vfsUpsertFile(filePathAbsolute, content);

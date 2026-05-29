@@ -1,4 +1,3 @@
-import { CachedFactory } from "cached-factory";
 import { SyntaxKind } from "typescript";
 
 import type * as AST from "../types/ast.ts";
@@ -30,7 +29,7 @@ export type {
 	ScopeVariable,
 } from "./types.ts";
 
-const scopeManagers = new CachedFactory(createScopeManager);
+const scopeManagers = new WeakMap<AST.SourceFile, ScopeManager>();
 
 export function createScopeManager(sourceFile: AST.SourceFile) {
 	const declarationVariablesByIdentifier = new WeakMap<
@@ -247,5 +246,11 @@ export function createScopeManager(sourceFile: AST.SourceFile) {
 }
 
 export function getScopeManager(sourceFile: AST.SourceFile) {
-	return scopeManagers.get(sourceFile);
+	let scopeManager = scopeManagers.get(sourceFile);
+	if (!scopeManager) {
+		scopeManager = createScopeManager(sourceFile);
+		scopeManagers.set(sourceFile, scopeManager);
+	}
+
+	return scopeManager;
 }

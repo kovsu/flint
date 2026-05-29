@@ -18,6 +18,9 @@ export interface Scope {
 }
 
 export interface ScopeInternal extends Scope {
+	// TODO: Many scopes have no child scopes and/or variables; making these
+	// optional (or dropping them) may cut allocations, once we can measure it.
+	// https://github.com/flint-fyi/flint/issues/2627
 	childScopes: ScopeInternal[];
 	upper: ScopeInternal | undefined;
 	variablesByName: Map<string, ScopeVariable>;

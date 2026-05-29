@@ -2,7 +2,6 @@ import * as tsutils from "ts-api-utils";
 import { SyntaxKind } from "typescript";
 
 import type * as AST from "../types/ast.ts";
-import { forEachChild } from "../utils/forEachChild.ts";
 
 export function isNonReferenceIdentifier(identifier: AST.Identifier) {
 	if (
@@ -99,7 +98,7 @@ function isIdentifierDeclaration(identifier: AST.Identifier) {
 		case SyntaxKind.BindingElement:
 		case SyntaxKind.Parameter:
 		case SyntaxKind.VariableDeclaration:
-			return isIdentifierWithinNode(identifier, parent.name);
+			return isIdentifierWithinParent(identifier, parent.name);
 		case SyntaxKind.ClassDeclaration:
 		case SyntaxKind.ClassExpression:
 		case SyntaxKind.FunctionDeclaration:
@@ -118,21 +117,22 @@ function isIdentifierDeclaration(identifier: AST.Identifier) {
 	return false;
 }
 
-function isIdentifierWithinNode(identifier: AST.Identifier, node: AST.AnyNode) {
-	if (identifier === node) {
-		return true;
-	}
+function isIdentifierWithinParent(
+	identifier: AST.Identifier,
+	parent: AST.AnyNode,
+) {
+	let current: AST.AnyNode = identifier;
 
-	let containsIdentifier = false;
-	forEachChild(node, (child) => {
-		if (containsIdentifier) {
-			return;
+	while (current !== parent) {
+		const next = current.parent as AST.AnyNode | undefined;
+		if (!next) {
+			return false;
 		}
 
-		containsIdentifier = isIdentifierWithinNode(identifier, child);
-	});
+		current = next;
+	}
 
-	return containsIdentifier;
+	return true;
 }
 
 function isTypeReferenceIdentifier(identifier: AST.Identifier) {
@@ -147,5 +147,5 @@ function isTypeReferenceIdentifier(identifier: AST.Identifier) {
 		return false;
 	}
 
-	return isIdentifierWithinNode(identifier, parent.typeName);
+	return isIdentifierWithinParent(identifier, parent.typeName);
 }

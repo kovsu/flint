@@ -1,3 +1,4 @@
+import { CachedFactory } from "cached-factory";
 import { SyntaxKind } from "typescript";
 
 import type * as AST from "../types/ast.ts";
@@ -29,7 +30,7 @@ export type {
 	ScopeVariable,
 } from "./types.ts";
 
-const scopeManagers = new WeakMap<AST.SourceFile, ScopeManager>();
+const scopeManagers = new CachedFactory(createScopeManager);
 
 export function createScopeManager(sourceFile: AST.SourceFile) {
 	const declarationVariablesByIdentifier = new WeakMap<
@@ -129,6 +130,10 @@ export function createScopeManager(sourceFile: AST.SourceFile) {
 			node !== sourceFile && isScopeBoundary(node)
 				? createScope(node, scope)
 				: scope;
+		// TODO: Storing every node costs memory per node when most are never
+		// looked up; consider resolving a node's scope lazily by walking up to
+		// the nearest boundary parent, once we can measure the tradeoff.
+		// https://github.com/flint-fyi/flint/issues/2627
 		nodeScopes.set(node, nodeScope);
 
 		switch (node.kind) {
@@ -242,11 +247,5 @@ export function createScopeManager(sourceFile: AST.SourceFile) {
 }
 
 export function getScopeManager(sourceFile: AST.SourceFile) {
-	let scopeManager = scopeManagers.get(sourceFile);
-	if (!scopeManager) {
-		scopeManager = createScopeManager(sourceFile);
-		scopeManagers.set(sourceFile, scopeManager);
-	}
-
-	return scopeManager;
+	return scopeManagers.get(sourceFile);
 }

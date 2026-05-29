@@ -31,6 +31,9 @@ export function createScope(
 	return scope;
 }
 
+// TODO: Consider a generator/iterator design to avoid allocating a full array
+// when callers bail out early, once we can measure the tradeoff.
+// https://github.com/flint-fyi/flint/issues/2627
 export function getReferencesInScope(scope: ScopeInternal) {
 	const references = [...scope.references];
 

@@ -132,7 +132,10 @@ export function createVFSLinterHost(
 		},
 		getFileTouchTimeSync(filePath) {
 			const file = fileMap.get(pathKey(filePath, caseSensitiveFS));
-			return file?.touchTime;
+			if (file != null) {
+				return file.touchTime;
+			}
+			return baseHost?.getFileTouchTimeSync(filePath);
 		},
 		isCaseSensitiveFS() {
 			return caseSensitiveFS;

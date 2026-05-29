@@ -1,8 +1,8 @@
 export interface LinterHost {
 	fileTypeSync(pathAbsolute: string): "directory" | "file" | undefined;
 	getCurrentDirectory(): string;
-	getFileTouchTime(filePath: string): Promise<number>;
-	getFileTouchTimeSync(filePath: string): number;
+	getFileTouchTime(filePath: string): Promise<number | undefined>;
+	getFileTouchTimeSync(filePath: string): number | undefined;
 	isCaseSensitiveFS(): boolean;
 	readDirectory(
 		directoryPathAbsolute: string,

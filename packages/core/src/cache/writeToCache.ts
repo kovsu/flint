@@ -27,8 +27,11 @@ export async function writeToCache(
 
 	const storage: CacheStorage = {
 		configs: {
-			[configFileName]: await host.getFileTouchTime(configFileName),
-			"package.json": await host.getFileTouchTime("package.json"),
+			// Fall back to 0 (not the current time) when the host can't report a
+			// touch time: a fabricated "now" would mask later changes, whereas 0
+			// forces a safe re-validation on the next run.
+			[configFileName]: (await host.getFileTouchTime(configFileName)) ?? 0,
+			"package.json": (await host.getFileTouchTime("package.json")) ?? 0,
 		},
 		files: {
 			...Object.fromEntries(

@@ -17,6 +17,7 @@ export function vueParsingErrorsToLanguageReports(
 		}
 		return {
 			code,
+			source: "vue",
 			text: `${fileName}${loc} - ${code}: ${error.name} - ${error.message}`,
 			...("code" in error &&
 				error.loc != null && {

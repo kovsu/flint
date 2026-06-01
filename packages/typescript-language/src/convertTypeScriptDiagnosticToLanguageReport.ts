@@ -28,6 +28,7 @@ export function convertTypeScriptDiagnosticToLanguageReport(
 ): LanguageReport {
 	return {
 		code: `TS${diagnostic.code}`,
+		source: "typescript",
 		text: formatReport(diagnostic),
 		...(diagnostic.file !== undefined &&
 			diagnostic.start !== undefined && {

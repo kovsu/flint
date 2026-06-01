@@ -102,6 +102,7 @@ export function errorToLanguageReport(
 ): LanguageReport {
 	if (typeof error !== "object" || error == null) {
 		return {
+			source: "svelte",
 			text: `${fileName} - Unknown error`,
 		};
 	}
@@ -111,6 +112,7 @@ export function errorToLanguageReport(
 			? `:${svelteError.start.line}:${svelteError.start.column}`
 			: "";
 	const res: LanguageReport = {
+		source: "svelte",
 		text: `${fileName}${loc} - ${"message" in error && typeof error.message === "string" ? error.message : "Codegen error"}`,
 	};
 	if (svelteError?.start != null) {

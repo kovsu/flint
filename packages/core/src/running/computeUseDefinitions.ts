@@ -33,7 +33,7 @@ export async function computeUseDefinitions(
 
 	const allFilePaths = new Set<string>();
 	const cwd = host.getCurrentDirectory();
-	const gitignoreFilter = createGitignoreFilter(cwd, host);
+	const isNotIgnored = createGitignoreFilter(host);
 
 	const useDefinitions = await Promise.all(
 		configDefinition.use.map(async (use) => {
@@ -54,7 +54,7 @@ export async function computeUseDefinitions(
 				)
 				.filter(
 					(absolutePath): absolutePath is string =>
-						absolutePath !== null && gitignoreFilter(absolutePath),
+						absolutePath !== null && isNotIgnored(absolutePath),
 				);
 
 			for (const foundFilePath of foundFilePaths) {

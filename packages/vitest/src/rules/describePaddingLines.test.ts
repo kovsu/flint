@@ -5,8 +5,8 @@ ruleTester.describe(rule, {
 	invalid: [
 		{
 			code: `
-functionOne();
-functionTwo();
+const functionOne = () => {};
+const functionTwo = () => {};
 
 const someText = 'abc';
 const someObject = {
@@ -36,8 +36,8 @@ describe
   });
 `,
 			output: `
-functionOne();
-functionTwo();
+const functionOne = () => {};
+const functionTwo = () => {};
 
 const someText = 'abc';
 const someObject = {
@@ -76,8 +76,8 @@ describe
   });
 `,
 			snapshot: `
-functionOne();
-functionTwo();
+const functionOne = () => {};
+const functionTwo = () => {};
 
 const someText = 'abc';
 const someObject = {
@@ -126,8 +126,8 @@ This statement should be separated from a neighboring \`describe\` block by a bl
 	],
 	valid: [
 		`
-functionOne();
-functionTwo();
+const functionOne = () => {};
+const functionTwo = () => {};
 
 const someText = 'abc';
 const someObject = {

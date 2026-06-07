@@ -1,5 +1,6 @@
-import ignore from "ignore";
 import path from "node:path";
+
+import ignore from "ignore";
 
 import type { LinterHost } from "../types/host.ts";
 
@@ -12,15 +13,14 @@ export function createGitignoreFilter(host: LinterHost) {
 			return matchers.get(directory);
 		}
 
-		let matcher: ignore.Ignore | undefined;
 		const gitignorePath = path.posix.join(directory, ".gitignore");
-		if (host.fileTypeSync(gitignorePath) === "file") {
-			const content = host.readFileSync(gitignorePath);
-			if (content !== undefined) {
-				matcher = ignore().add(content);
-			}
+		if (host.fileTypeSync(gitignorePath) !== "file") {
+			matchers.set(directory, undefined);
+			return undefined;
 		}
 
+		const content = host.readFileSync(gitignorePath);
+		const matcher = content === undefined ? undefined : ignore().add(content);
 		matchers.set(directory, matcher);
 		return matcher;
 	}

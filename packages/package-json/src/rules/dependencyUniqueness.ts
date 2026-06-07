@@ -1,10 +1,11 @@
-import { getJsonNodeRange, jsonLanguage } from "@flint.fyi/json-language";
-import type { AST } from "@flint.fyi/typescript-language";
 import { SyntaxKind } from "typescript";
 
-import { getPackageProperties } from "../getPackageProperties.ts";
-import { removeArrayElement } from "../removeArrayElement.ts";
-import { removeObjectProperty } from "../removeObjectProperty.ts";
+import { getJsonNodeRange, jsonLanguage } from "@flint.fyi/json-language";
+import type { AST } from "@flint.fyi/typescript-language";
+
+import { getPackagePropertiesLegacy } from "../getPackageProperties.ts";
+import { removeArrayElementLegacy } from "../removeArrayElement.ts";
+import { removeObjectPropertyLegacy } from "../removeObjectProperty.ts";
 import { ruleCreator } from "../ruleCreator.ts";
 
 const dependencyPropertyNames = new Set([
@@ -22,6 +23,8 @@ const crossGroupDependencyPropertyNames = new Set([
 	"peerDependencies",
 ]);
 
+// flint-disable-next-line ts/deprecated
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 export default ruleCreator.createRule(jsonLanguage, {
 	about: {
 		description:
@@ -50,7 +53,7 @@ export default ruleCreator.createRule(jsonLanguage, {
 	setup(context) {
 		return {
 			visitors: {
-				JsonSourceFile(node, { sourceFile }) {
+				JsonSourceFile(node) {
 					const dependencies = new Set<string>();
 					const crossGroupDependencies: AST.ObjectLiteralExpression[] = [];
 
@@ -69,15 +72,15 @@ export default ruleCreator.createRule(jsonLanguage, {
 								continue;
 							}
 
-							const { range, text } = removeArrayElement(
-								sourceFile,
+							const { range, text } = removeArrayElementLegacy(
+								node,
 								element,
 								initializer,
 							);
 
 							context.report({
 								message: "duplicateDependency",
-								range: getJsonNodeRange(element, sourceFile),
+								range: getJsonNodeRange(element, node),
 								suggestions: [
 									{
 										id: "removeDependency",
@@ -109,15 +112,15 @@ export default ruleCreator.createRule(jsonLanguage, {
 								continue;
 							}
 
-							const { range, text } = removeObjectProperty(
-								sourceFile,
+							const { range, text } = removeObjectPropertyLegacy(
+								node,
 								dependency,
 								initializer,
 							);
 
 							context.report({
 								message: "duplicateDependency",
-								range: getJsonNodeRange(dependencyName, sourceFile),
+								range: getJsonNodeRange(dependencyName, node),
 								suggestions: [
 									{
 										id: "removeDependency",
@@ -140,15 +143,15 @@ export default ruleCreator.createRule(jsonLanguage, {
 									continue;
 								}
 
-								const { range, text } = removeObjectProperty(
-									sourceFile,
+								const { range, text } = removeObjectPropertyLegacy(
+									node,
 									dependency,
 									dependencyGroup,
 								);
 
 								context.report({
 									message: "crossGroupDuplicate",
-									range: getJsonNodeRange(dependency.name, sourceFile),
+									range: getJsonNodeRange(dependency.name, node),
 									suggestions: [
 										{
 											id: "removeDependency",
@@ -161,7 +164,7 @@ export default ruleCreator.createRule(jsonLanguage, {
 						}
 					}
 
-					for (const property of getPackageProperties(node) ?? []) {
+					for (const property of getPackagePropertiesLegacy(node) ?? []) {
 						if (
 							property.kind !== SyntaxKind.PropertyAssignment ||
 							property.name.kind !== SyntaxKind.StringLiteral ||

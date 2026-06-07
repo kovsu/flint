@@ -1,14 +1,15 @@
-import type { CharacterReportRange } from "@flint.fyi/core";
-import {
-	type AST,
-	type Checker,
-	getTSNodeRange,
-	hasSameTokens,
-	typescriptLanguage,
-} from "@flint.fyi/typescript-language";
 import * as tsutils from "ts-api-utils";
 import ts from "typescript";
 import { z } from "zod/v4";
+
+import type { CharacterReportRange } from "@flint.fyi/core";
+import {
+	getTSNodeRange,
+	hasSameTokens,
+	typescriptLanguage,
+	type AST,
+	type Checker,
+} from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -582,6 +583,18 @@ export default ruleCreator.createRule(typescriptLanguage, {
 			return { range, text: `${leftText} ?? ${getText(alternate)}` };
 		}
 
+		function createNullishAssignmentFix(
+			left: AST.AnyNode,
+			right: AST.AnyNode,
+			sourceFile: AST.SourceFile,
+			range: CharacterReportRange,
+		) {
+			const getText = (node: AST.AnyNode) =>
+				sourceFile.text.substring(node.getStart(sourceFile), node.getEnd());
+
+			return { range, text: `${getText(left)} ??= ${getText(right)};` };
+		}
+
 		return {
 			visitors: {
 				BinaryExpression: (node, { options, sourceFile, typeChecker }) => {
@@ -672,7 +685,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					const range = getTSNodeRange(node, sourceFile);
 
 					context.report({
-						fix: createNullishNodesFix(
+						fix: createNullishAssignmentFix(
 							assignmentExpression.left,
 							assignmentExpression.right,
 							sourceFile,

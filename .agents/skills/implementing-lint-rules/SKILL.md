@@ -11,6 +11,7 @@ Patterns and practices for implementing lint rules in Flint.
 
 Before writing a new rule or expanding an existing one, read the backing issue and at least one nearby rule in the same plugin.
 Use the local rule implementation, test, docs page, `plugin.ts`, and `packages/comparisons/src/data.json` patterns as the implementation template.
+`data.json` is very large: search it for the relevant rule names and pull only the matching entries into context instead of reading the whole file.
 External linter rules can be behavior references, but they should not determine Flint's architecture or test layout.
 
 If an issue is labeled `status: in discussion`, `status: blocked`, or `status: needs investigation`, tell the user before treating it as ready for implementation.
@@ -40,6 +41,9 @@ Example: instead of messages like _"Octal escape sequences should not be used in
 
 ## AST Node Handling
 
+The guidance in this section is specific to TypeScript and TypeScript-derived languages.
+Rules for other languages also visit AST nodes, but use the node types from their own `*-language` package instead of TSL and `ts.*` APIs.
+
 Prefer TSL `AST.*` node types whenever a visitor gives them to you.
 Treat `ts.Node`, `ts.forEachChild`, `ts.findAncestor`, and broad TypeScript-native traversal as escape hatches.
 If one is necessary, keep it narrow and make sure tests cover the path that required it.
@@ -59,6 +63,8 @@ In a `SourceFile` visitor, use the `node` parameter itself instead of destructur
 Don't add `@ts-expect-error` or broad type assertions to work around visitor typing unless there is an existing local pattern and a narrow reason.
 
 ## Type-Aware Rules
+
+Like AST node handling above, this section is specific to TypeScript and TypeScript-derived languages.
 
 If a rule depends on the type checker, project service, module resolution, or file graph, add tests that prove the type information is necessary.
 Use multi-file RuleTester cases when behavior depends on imports, declarations, compiler options, file names, or project boundaries.

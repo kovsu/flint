@@ -42,7 +42,7 @@ Example: instead of messages like _"Octal escape sequences should not be used in
 ## AST Node Handling
 
 The guidance in this section is specific to TypeScript and TypeScript-derived languages.
-Rules for other languages also visit AST nodes, but use the node types from their own `*-language` package instead of TSL and `ts.*` APIs.
+Rules for other languages also visit AST nodes, but should use node types from their own `*-language` package rather than TSL `AST.*` nodes or `ts.*` APIs.
 
 Prefer TSL `AST.*` node types whenever a visitor gives them to you.
 Treat `ts.Node`, `ts.forEachChild`, `ts.findAncestor`, and broad TypeScript-native traversal as escape hatches.

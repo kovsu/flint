@@ -1,5 +1,6 @@
-import { execa } from "execa";
+import util from "node:util";
 
+import { runCli } from "@flint.fyi/cli";
 import { normalizePath } from "@flint.fyi/utils";
 
 declare global {
@@ -35,12 +36,30 @@ export function normalizeOutput(stdout: string, cwd: string): string {
 }
 
 /**
- * Runs the flint CLI with color output enabled.
+ * Runs the flint CLI in-process, capturing its stdout.
+ * Color output comes from the e2e Vitest project's FORCE_COLOR env.
  */
-export function runFlint(cwd: string, args: string[] = []) {
-	return execa({
-		cwd,
-		env: { FORCE_COLOR: "1" },
-		reject: false,
-	})`flint ${args}`;
+export async function runFlint(cwd: string, args: string[] = []) {
+	const previousCwd = process.cwd();
+	const originalWrite = process.stdout.write.bind(process.stdout);
+	const originalLog = console.log;
+	const chunks: string[] = [];
+
+	process.chdir(cwd);
+	process.stdout.write = (chunk) => {
+		chunks.push(String(chunk));
+		return true;
+	};
+	console.log = (...args: unknown[]) => {
+		chunks.push(`${util.format(...args)}\n`);
+	};
+
+	try {
+		const exitCode = await runCli(args);
+		return { exitCode, stdout: chunks.join("") };
+	} finally {
+		process.stdout.write = originalWrite;
+		console.log = originalLog;
+		process.chdir(previousCwd);
+	}
 }

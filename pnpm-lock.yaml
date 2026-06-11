@@ -696,6 +696,9 @@ importers:
 
   packages/e2e:
     devDependencies:
+      '@flint.fyi/cli':
+        specifier: workspace:^
+        version: link:../cli
       '@flint.fyi/spelling':
         specifier: workspace:^
         version: link:../spelling

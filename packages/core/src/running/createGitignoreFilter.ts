@@ -13,14 +13,15 @@ export function createGitignoreFilter(host: LinterHost) {
 			return matchers.get(directory);
 		}
 
+		let matcher: ignore.Ignore | undefined;
 		const gitignorePath = path.posix.join(directory, ".gitignore");
-		if (host.fileTypeSync(gitignorePath) !== "file") {
-			matchers.set(directory, undefined);
-			return undefined;
+		if (host.fileTypeSync(gitignorePath) === "file") {
+			const content = host.readFileSync(gitignorePath);
+			if (content !== undefined) {
+				matcher = ignore().add(content);
+			}
 		}
 
-		const content = host.readFileSync(gitignorePath);
-		const matcher = content === undefined ? undefined : ignore().add(content);
 		matchers.set(directory, matcher);
 		return matcher;
 	}

@@ -648,6 +648,9 @@ importers:
       omit-empty:
         specifier: ^1.0.0
         version: 1.0.0
+      picomatch:
+        specifier: ^4.0.4
+        version: 4.0.4
       zod:
         specifier: ^4.3.6
         version: 4.4.1
@@ -655,6 +658,9 @@ importers:
       '@types/omit-empty':
         specifier: catalog:dev
         version: 1.0.4
+      '@types/picomatch':
+        specifier: ^4.0.3
+        version: 4.0.3
       tsdown:
         specifier: catalog:dev
         version: 0.22.2(@arethetypeswrong/core@0.18.2)(oxc-resolver@11.20.0)(typescript@5.9.3)

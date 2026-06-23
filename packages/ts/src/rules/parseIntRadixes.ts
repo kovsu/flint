@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	getTSNodeRange,
@@ -13,18 +13,18 @@ import { ruleCreator } from "./ruleCreator.ts";
 
 function isParseIntCall(node: AST.CallExpression, typeChecker: Checker) {
 	switch (node.expression.kind) {
-		case ts.SyntaxKind.Identifier:
+		case SyntaxKind.Identifier:
 			return isGlobalDeclarationOfName(
 				node.expression,
 				"parseInt",
 				typeChecker,
 			);
 
-		case ts.SyntaxKind.PropertyAccessExpression:
+		case SyntaxKind.PropertyAccessExpression:
 			return (
-				ts.isIdentifier(node.expression.name) &&
+				node.expression.name.kind === SyntaxKind.Identifier &&
 				node.expression.name.text === "parseInt" &&
-				ts.isIdentifier(node.expression.expression) &&
+				node.expression.expression.kind === SyntaxKind.Identifier &&
 				node.expression.expression.text === "Number" &&
 				isGlobalDeclarationOfName(
 					node.expression.expression,
@@ -42,16 +42,16 @@ function isParseIntCall(node: AST.CallExpression, typeChecker: Checker) {
 // https://github.com/flint-fyi/flint/issues/1298
 function isValidRadix(argument: AST.Expression) {
 	switch (argument.kind) {
-		case ts.SyntaxKind.Identifier:
+		case SyntaxKind.Identifier:
 			return argument.text !== "undefined";
 
-		case ts.SyntaxKind.NumericLiteral:
+		case SyntaxKind.NumericLiteral:
 			return isValidRadixValue(Number(argument.text));
 
-		case ts.SyntaxKind.PrefixUnaryExpression:
+		case SyntaxKind.PrefixUnaryExpression:
 			return (
-				argument.operator === ts.SyntaxKind.MinusToken &&
-				ts.isNumericLiteral(argument.operand) &&
+				argument.operator === SyntaxKind.MinusToken &&
+				argument.operand.kind === SyntaxKind.NumericLiteral &&
 				isValidRadixValue(-Number(argument.operand.text))
 			);
 

@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	getTSNodeRange,
@@ -24,7 +24,7 @@ function isIndexOfCall(node: AST.CallExpression) {
 	// TODO: Use a util like getStaticValue
 	// https://github.com/flint-fyi/flint/issues/1298
 	return (
-		ts.isPropertyAccessExpression(node.expression) &&
+		node.expression.kind === SyntaxKind.PropertyAccessExpression &&
 		node.expression.name.text === "indexOf"
 	);
 }
@@ -34,9 +34,9 @@ function isIndexOfComparison(node: AST.BinaryExpression, typeChecker: Checker) {
 
 	let indexOfAndValue: [AST.CallExpression, AST.Expression] | undefined;
 
-	if (ts.isCallExpression(left) && isIndexOfCall(left)) {
+	if (left.kind === SyntaxKind.CallExpression && isIndexOfCall(left)) {
 		indexOfAndValue = [left, right];
-	} else if (ts.isCallExpression(right) && isIndexOfCall(right)) {
+	} else if (right.kind === SyntaxKind.CallExpression && isIndexOfCall(right)) {
 		indexOfAndValue = [right, left];
 	}
 
@@ -47,7 +47,7 @@ function isIndexOfComparison(node: AST.BinaryExpression, typeChecker: Checker) {
 	const [indexOfCall, comparedValue] = indexOfAndValue;
 
 	if (
-		!ts.isPropertyAccessExpression(indexOfCall.expression) ||
+		indexOfCall.expression.kind !== SyntaxKind.PropertyAccessExpression ||
 		!hasIncludesMethod(indexOfCall.expression.expression, typeChecker)
 	) {
 		return undefined;
@@ -55,19 +55,19 @@ function isIndexOfComparison(node: AST.BinaryExpression, typeChecker: Checker) {
 
 	const kind = operatorToken.kind;
 	const isZeroValue = isZero(comparedValue);
-	const indexOfOnLeft = ts.isCallExpression(left);
+	const indexOfOnLeft = left.kind === SyntaxKind.CallExpression;
 
 	const isValidComparison =
 		(isNegativeOne(comparedValue) &&
-			(kind === ts.SyntaxKind.ExclamationEqualsToken ||
-				kind === ts.SyntaxKind.ExclamationEqualsEqualsToken ||
-				kind === ts.SyntaxKind.EqualsEqualsToken ||
-				kind === ts.SyntaxKind.EqualsEqualsEqualsToken ||
-				(indexOfOnLeft && kind === ts.SyntaxKind.GreaterThanToken) ||
-				(!indexOfOnLeft && kind === ts.SyntaxKind.LessThanToken))) ||
+			(kind === SyntaxKind.ExclamationEqualsToken ||
+				kind === SyntaxKind.ExclamationEqualsEqualsToken ||
+				kind === SyntaxKind.EqualsEqualsToken ||
+				kind === SyntaxKind.EqualsEqualsEqualsToken ||
+				(indexOfOnLeft && kind === SyntaxKind.GreaterThanToken) ||
+				(!indexOfOnLeft && kind === SyntaxKind.LessThanToken))) ||
 		(isZeroValue &&
-			((indexOfOnLeft && kind === ts.SyntaxKind.GreaterThanEqualsToken) ||
-				(!indexOfOnLeft && kind === ts.SyntaxKind.LessThanEqualsToken)));
+			((indexOfOnLeft && kind === SyntaxKind.GreaterThanEqualsToken) ||
+				(!indexOfOnLeft && kind === SyntaxKind.LessThanEqualsToken)));
 
 	return isValidComparison && { indexOfCall, node };
 }
@@ -76,9 +76,9 @@ function isIndexOfComparison(node: AST.BinaryExpression, typeChecker: Checker) {
 // https://github.com/flint-fyi/flint/issues/1298
 function isNegativeOne(node: AST.Expression) {
 	return (
-		ts.isPrefixUnaryExpression(node) &&
-		node.operator === ts.SyntaxKind.MinusToken &&
-		ts.isNumericLiteral(node.operand) &&
+		node.kind === SyntaxKind.PrefixUnaryExpression &&
+		node.operator === SyntaxKind.MinusToken &&
+		node.operand.kind === SyntaxKind.NumericLiteral &&
 		node.operand.text === "1"
 	);
 }
@@ -86,7 +86,7 @@ function isNegativeOne(node: AST.Expression) {
 // TODO: Use a util like getStaticValue
 // https://github.com/flint-fyi/flint/issues/1298
 function isZero(node: AST.Expression) {
-	return ts.isNumericLiteral(node) && node.text === "0";
+	return node.kind === SyntaxKind.NumericLiteral && node.text === "0";
 }
 
 export default ruleCreator.createRule(typescriptLanguage, {

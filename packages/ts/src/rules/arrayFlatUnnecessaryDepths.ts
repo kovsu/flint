@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	getTSNodeRange,
@@ -29,7 +29,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 			visitors: {
 				CallExpression: (node, { sourceFile, typeChecker }) => {
 					if (
-						!ts.isPropertyAccessExpression(node.expression) ||
+						node.expression.kind !== SyntaxKind.PropertyAccessExpression ||
 						node.expression.name.text !== "flat" ||
 						node.arguments.length !== 1
 					) {
@@ -41,7 +41,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 
 					// TODO: Use a util like getStaticValue
 					// https://github.com/flint-fyi/flint/issues/1298
-					if (!ts.isNumericLiteral(arg) || arg.text !== "1") {
+					if (arg.kind !== SyntaxKind.NumericLiteral || arg.text !== "1") {
 						return;
 					}
 

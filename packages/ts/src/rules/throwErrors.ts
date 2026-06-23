@@ -1,5 +1,5 @@
 import * as tsutils from "ts-api-utils";
-import * as ts from "typescript";
+import { TypeFlags, type Type } from "typescript";
 
 import {
 	declarationIncludesGlobal,
@@ -12,7 +12,7 @@ import {
 import { ruleCreator } from "./ruleCreator.ts";
 import { getConstrainedTypeAtLocation } from "./utils/getConstrainedType.ts";
 
-function isBuiltinErrorType(type: ts.Type): boolean {
+function isBuiltinErrorType(type: Type): boolean {
 	const symbol = type.getSymbol();
 	if (symbol?.getName() !== "Error") {
 		return false;
@@ -21,7 +21,7 @@ function isBuiltinErrorType(type: ts.Type): boolean {
 	return !!symbol.getDeclarations()?.some(declarationIncludesGlobal);
 }
 
-function isErrorType(type: ts.Type): boolean {
+function isErrorType(type: Type): boolean {
 	if (isBuiltinErrorType(type)) {
 		return true;
 	}
@@ -89,10 +89,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					);
 
 					if (
-						tsutils.isTypeFlagSet(
-							type,
-							ts.TypeFlags.Any | ts.TypeFlags.Unknown,
-						) ||
+						tsutils.isTypeFlagSet(type, TypeFlags.Any | TypeFlags.Unknown) ||
 						isErrorType(type)
 					) {
 						return;
@@ -103,9 +100,9 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					if (
 						type.isUnion()
 							? type.types.every((t) =>
-									tsutils.isTypeFlagSet(t, ts.TypeFlags.Undefined),
+									tsutils.isTypeFlagSet(t, TypeFlags.Undefined),
 								)
-							: tsutils.isTypeFlagSet(type, ts.TypeFlags.Undefined)
+							: tsutils.isTypeFlagSet(type, TypeFlags.Undefined)
 					) {
 						context.report({
 							message: "throwUndefined",

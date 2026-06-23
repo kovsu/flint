@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	getTSNodeRange,
@@ -15,8 +15,8 @@ function isArrayMapCall(
 	typeChecker: Checker,
 ): node is AST.CallExpression {
 	return (
-		ts.isCallExpression(node) &&
-		ts.isPropertyAccessExpression(node.expression) &&
+		node.kind === SyntaxKind.CallExpression &&
+		node.expression.kind === SyntaxKind.PropertyAccessExpression &&
 		node.expression.name.text === "map" &&
 		node.arguments.length >= 1 &&
 		isArrayOrTupleTypeAtLocation(node.expression.expression, typeChecker)
@@ -34,7 +34,10 @@ function isFlatCallWithDepthOne(node: AST.CallExpression) {
 
 			// TODO: Use a util like getStaticValue
 			// https://github.com/flint-fyi/flint/issues/1298
-			return ts.isNumericLiteral(firstArgument) && firstArgument.text === "1";
+			return (
+				firstArgument.kind === SyntaxKind.NumericLiteral &&
+				firstArgument.text === "1"
+			);
 		}
 
 		default:
@@ -64,7 +67,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		return {
 			visitors: {
 				CallExpression: (node, { sourceFile, typeChecker }) => {
-					if (!ts.isPropertyAccessExpression(node.expression)) {
+					if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
 						return;
 					}
 

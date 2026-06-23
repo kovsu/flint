@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	getTSNodeRange,
@@ -18,24 +18,25 @@ function hasCallbackArgument(callExpression: AST.CallExpression) {
 	const firstArgument = callExpression.arguments[0]!;
 
 	return (
-		ts.isArrowFunction(firstArgument) ||
-		ts.isFunctionExpression(firstArgument) ||
-		(ts.isIdentifier(firstArgument) && firstArgument.text !== "undefined")
+		firstArgument.kind === SyntaxKind.ArrowFunction ||
+		firstArgument.kind === SyntaxKind.FunctionExpression ||
+		(firstArgument.kind === SyntaxKind.Identifier &&
+			firstArgument.text !== "undefined")
 	);
 }
 
 // TODO: Use a util like getStaticValue
 // https://github.com/flint-fyi/flint/issues/1298
-function isNumericLiteral(node: ts.Expression) {
-	if (ts.isNumericLiteral(node)) {
+function isNumericLiteral(node: AST.Expression) {
+	if (node.kind === SyntaxKind.NumericLiteral) {
 		return true;
 	}
 
-	if (ts.isPrefixUnaryExpression(node)) {
+	if (node.kind === SyntaxKind.PrefixUnaryExpression) {
 		return (
-			(node.operator === ts.SyntaxKind.MinusToken ||
-				node.operator === ts.SyntaxKind.PlusToken) &&
-			ts.isNumericLiteral(node.operand)
+			(node.operator === SyntaxKind.MinusToken ||
+				node.operator === SyntaxKind.PlusToken) &&
+			node.operand.kind === SyntaxKind.NumericLiteral
 		);
 	}
 
@@ -66,15 +67,15 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		return {
 			visitors: {
 				CallExpression: (node, { sourceFile, typeChecker }) => {
-					if (!ts.isPropertyAccessExpression(node.expression)) {
+					if (node.expression.kind !== SyntaxKind.PropertyAccessExpression) {
 						return;
 					}
 
 					const objectExpression = node.expression.expression;
 
 					if (
-						!ts.isNewExpression(objectExpression) ||
-						!ts.isIdentifier(objectExpression.expression) ||
+						objectExpression.kind !== SyntaxKind.NewExpression ||
+						objectExpression.expression.kind !== SyntaxKind.Identifier ||
 						!isGlobalDeclarationOfName(
 							objectExpression.expression,
 							"Array",

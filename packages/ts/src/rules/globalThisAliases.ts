@@ -1,4 +1,4 @@
-import ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	declarationIncludesGlobal,
@@ -26,15 +26,17 @@ function isOnlyGlobalDeclaration(node: AST.Identifier, typeChecker: Checker) {
 	return declarations.every(declarationIncludesGlobal);
 }
 
-function isPropertyAccess(node: ts.Identifier) {
+function isPropertyAccess(node: AST.Identifier) {
 	return (
-		ts.isPropertyAccessExpression(node.parent) && node.parent.name === node
+		node.parent.kind === SyntaxKind.PropertyAccessExpression &&
+		node.parent.name === node
 	);
 }
 
-function isPropertyShorthand(node: ts.Identifier) {
+function isPropertyShorthand(node: AST.Identifier) {
 	return (
-		ts.isShorthandPropertyAssignment(node.parent) && node.parent.name === node
+		node.parent.kind === SyntaxKind.ShorthandPropertyAssignment &&
+		node.parent.name === node
 	);
 }
 

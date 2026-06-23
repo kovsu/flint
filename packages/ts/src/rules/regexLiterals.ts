@@ -1,4 +1,4 @@
-import * as ts from "typescript";
+import { SyntaxKind } from "typescript";
 
 import {
 	typescriptLanguage,
@@ -71,8 +71,8 @@ function escapeForRegexLiteral(pattern: string) {
 // (also move this into getRegExpConstruction)
 function isStaticString(node: AST.Expression) {
 	return (
-		node.kind === ts.SyntaxKind.StringLiteral ||
-		node.kind === ts.SyntaxKind.NoSubstitutionTemplateLiteral
+		node.kind === SyntaxKind.StringLiteral ||
+		node.kind === SyntaxKind.NoSubstitutionTemplateLiteral
 	);
 }
 

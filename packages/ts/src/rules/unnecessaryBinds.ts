@@ -3,10 +3,10 @@ import ts from "typescript";
 import {
 	getTSNodeRange,
 	typescriptLanguage,
+	unwrapParenthesizedNode,
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 // TODO: This will be more clean when there is a scope manager
 // https://github.com/flint-fyi/flint/issues/400
@@ -119,7 +119,9 @@ export default ruleCreator.createRule(typescriptLanguage, {
 
 					// TODO: Use a util like getStaticValue
 					// https://github.com/flint-fyi/flint/issues/1298
-					const boundFunction = skipParentheses(node.expression.expression);
+					const boundFunction = unwrapParenthesizedNode(
+						node.expression.expression,
+					);
 					const fix = isStaticValue(boundArgument)
 						? {
 								range: getTSNodeRange(node, sourceFile),

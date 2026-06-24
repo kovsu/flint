@@ -1,9 +1,11 @@
 import * as ts from "typescript";
 
-import { typescriptLanguage } from "@flint.fyi/typescript-language";
+import {
+	typescriptLanguage,
+	unwrapParenthesizedNode,
+} from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
@@ -40,8 +42,8 @@ export default ruleCreator.createRule(typescriptLanguage, {
 							continue;
 						}
 
-						const whenTrue = skipParentheses(inner.whenTrue);
-						const whenFalse = skipParentheses(inner.whenFalse);
+						const whenTrue = unwrapParenthesizedNode(inner.whenTrue);
+						const whenFalse = unwrapParenthesizedNode(inner.whenFalse);
 
 						if (
 							ts.isArrayLiteralExpression(whenTrue) &&

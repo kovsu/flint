@@ -4,12 +4,12 @@ import {
 	getTSNodeRange,
 	isGlobalDeclarationOfName,
 	typescriptLanguage,
+	unwrapParenthesizedNode,
 	type AST,
 	type Checker,
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 function isNewSetExpression(expression: AST.Expression, typeChecker: Checker) {
 	return (
@@ -21,7 +21,7 @@ function isNewSetExpression(expression: AST.Expression, typeChecker: Checker) {
 }
 
 function isSetExpression(expression: AST.Expression, typeChecker: Checker) {
-	const unwrapped = skipParentheses(expression);
+	const unwrapped = unwrapParenthesizedNode(expression);
 
 	if (isNewSetExpression(unwrapped, typeChecker)) {
 		return true;
@@ -50,7 +50,7 @@ function isSetExpression(expression: AST.Expression, typeChecker: Checker) {
 	}
 
 	return isNewSetExpression(
-		skipParentheses(declaration.initializer),
+		unwrapParenthesizedNode(declaration.initializer),
 		typeChecker,
 	);
 }

@@ -6,6 +6,7 @@ import {
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
+import { skipParentheses } from "./utils/skipParentheses.ts";
 
 // TODO: This will be more clean when there is a scope manager
 // https://github.com/flint-fyi/flint/issues/400
@@ -70,13 +71,6 @@ function isStaticValue(node: ts.Expression): boolean {
 	);
 }
 
-function unwrapParentheses(node: ts.Expression): ts.Expression {
-	while (ts.isParenthesizedExpression(node)) {
-		node = node.expression;
-	}
-	return node;
-}
-
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
 		description: "Reports unnecessary `.bind()` calls.",
@@ -125,7 +119,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 
 					// TODO: Use a util like getStaticValue
 					// https://github.com/flint-fyi/flint/issues/1298
-					const boundFunction = unwrapParentheses(node.expression.expression);
+					const boundFunction = skipParentheses(node.expression.expression);
 					const fix = isStaticValue(boundArgument)
 						? {
 								range: getTSNodeRange(node, sourceFile),

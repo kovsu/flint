@@ -9,6 +9,7 @@ import {
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
+import { skipParentheses } from "./utils/skipParentheses.ts";
 
 function isNewSetExpression(expression: AST.Expression, typeChecker: Checker) {
 	return (
@@ -20,7 +21,7 @@ function isNewSetExpression(expression: AST.Expression, typeChecker: Checker) {
 }
 
 function isSetExpression(expression: AST.Expression, typeChecker: Checker) {
-	const unwrapped = unwrapParentheses(expression);
+	const unwrapped = skipParentheses(expression);
 
 	if (isNewSetExpression(unwrapped, typeChecker)) {
 		return true;
@@ -49,16 +50,9 @@ function isSetExpression(expression: AST.Expression, typeChecker: Checker) {
 	}
 
 	return isNewSetExpression(
-		unwrapParentheses(declaration.initializer),
+		skipParentheses(declaration.initializer),
 		typeChecker,
 	);
-}
-
-function unwrapParentheses(expression: AST.Expression): AST.Expression {
-	while (ts.isParenthesizedExpression(expression)) {
-		expression = expression.expression;
-	}
-	return expression;
 }
 
 export default ruleCreator.createRule(typescriptLanguage, {

@@ -3,6 +3,7 @@ import * as ts from "typescript";
 import { typescriptLanguage } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
+import { skipParentheses } from "./utils/skipParentheses.ts";
 
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
@@ -39,8 +40,8 @@ export default ruleCreator.createRule(typescriptLanguage, {
 							continue;
 						}
 
-						const whenTrue = unwrapParentheses(inner.whenTrue);
-						const whenFalse = unwrapParentheses(inner.whenFalse);
+						const whenTrue = skipParentheses(inner.whenTrue);
+						const whenFalse = skipParentheses(inner.whenFalse);
 
 						if (
 							ts.isArrayLiteralExpression(whenTrue) &&
@@ -101,10 +102,4 @@ function isEmptyStringLike(node: ts.Expression) {
 
 function isStringLike(node: ts.Expression) {
 	return ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node);
-}
-
-function unwrapParentheses(node: ts.Expression): ts.Expression {
-	return ts.isParenthesizedExpression(node)
-		? unwrapParentheses(node.expression)
-		: node;
 }

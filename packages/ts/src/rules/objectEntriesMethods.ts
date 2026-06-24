@@ -4,13 +4,13 @@ import {
 	getTSNodeRange,
 	isGlobalDeclarationOfName,
 	typescriptLanguage,
+	unwrapParenthesizedNode,
 	type AST,
 	type Checker,
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { isArrayOrTupleTypeAtLocation } from "./utils/isArrayOrTupleTypeAtLocation.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 function isArrowFunctionWithParams(
 	node: AST.Expression,
@@ -19,7 +19,7 @@ function isArrowFunctionWithParams(
 }
 
 function isEmptyObject(node: AST.Expression, typeChecker: Checker) {
-	const unwrapped = skipParentheses(node);
+	const unwrapped = unwrapParenthesizedNode(node);
 	return (
 		isEmptyObjectLiteral(unwrapped) ||
 		isObjectCreateNull(unwrapped, typeChecker)
@@ -50,7 +50,7 @@ function isObjectAssignPattern(
 	}
 
 	const accumulatorName = firstParameter.name.text;
-	const body = skipParentheses(callback.body as AST.Expression);
+	const body = unwrapParenthesizedNode(callback.body as AST.Expression);
 
 	if (
 		!isObjectMethodCall(body, "assign", typeChecker) ||
@@ -160,7 +160,7 @@ function isSpreadAccumulatorPattern(callback: AST.ArrowFunction) {
 	}
 
 	const accumulatorName = firstParam.name.text;
-	const body = skipParentheses(callback.body as AST.Expression);
+	const body = unwrapParenthesizedNode(callback.body as AST.Expression);
 
 	if (
 		body.kind !== SyntaxKind.ObjectLiteralExpression ||

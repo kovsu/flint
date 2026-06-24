@@ -5,12 +5,12 @@ import {
 	hasSameTokens,
 	isGlobalDeclarationOfName,
 	typescriptLanguage,
+	unwrapParenthesizedNode,
 	type AST,
 	type Checker,
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 function checkLogDivideConstant(
 	node: AST.BinaryExpression,
@@ -22,8 +22,8 @@ function checkLogDivideConstant(
 		return;
 	}
 
-	const left = skipParentheses(node.left);
-	const right = skipParentheses(node.right);
+	const left = unwrapParenthesizedNode(node.left);
+	const right = unwrapParenthesizedNode(node.right);
 
 	if (
 		getMathMethodArgument(left, "log", typeChecker) &&
@@ -46,8 +46,8 @@ function checkLogTimesConstant(
 		return;
 	}
 
-	const left = skipParentheses(node.left);
-	const right = skipParentheses(node.right);
+	const left = unwrapParenthesizedNode(node.left);
+	const right = unwrapParenthesizedNode(node.right);
 
 	if (
 		getMathMethodArgument(left, "log", typeChecker) &&
@@ -71,7 +71,7 @@ function checkLogTimesConstant(
 }
 
 function flattenPlusExpression(node: AST.Expression): AST.Expression[] {
-	const unwrapped = skipParentheses(node);
+	const unwrapped = unwrapParenthesizedNode(node);
 
 	if (
 		unwrapped.kind === SyntaxKind.BinaryExpression &&
@@ -131,7 +131,7 @@ function isPowerTwoExpression(
 	node: AST.Expression,
 	sourceFile: AST.SourceFile,
 ): boolean {
-	const unwrapped = skipParentheses(node);
+	const unwrapped = unwrapParenthesizedNode(node);
 
 	if (unwrapped.kind !== SyntaxKind.BinaryExpression) {
 		return false;
@@ -142,7 +142,7 @@ function isPowerTwoExpression(
 	}
 
 	if (unwrapped.operatorToken.kind === SyntaxKind.AsteriskAsteriskToken) {
-		const right = skipParentheses(unwrapped.right);
+		const right = unwrapParenthesizedNode(unwrapped.right);
 		return right.kind === SyntaxKind.NumericLiteral && right.text === "2";
 	}
 

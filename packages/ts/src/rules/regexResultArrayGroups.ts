@@ -8,6 +8,7 @@ import ts from "typescript";
 import {
 	getTSNodeRange,
 	typescriptLanguage,
+	unwrapParenthesizedNode,
 	type AST,
 	type Checker,
 	type TypeScriptFileServices,
@@ -16,7 +17,6 @@ import {
 import { ruleCreator } from "./ruleCreator.ts";
 import { getRegExpConstruction } from "./utils/getRegExpConstruction.ts";
 import { getRegExpLiteralDetails } from "./utils/getRegExpLiteralDetails.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 interface NamedCapturingGroup {
 	index: number;
@@ -24,7 +24,7 @@ interface NamedCapturingGroup {
 }
 
 function extractCallExpression(expression: AST.Expression) {
-	const unwrapped = skipParentheses(expression);
+	const unwrapped = unwrapParenthesizedNode(expression);
 
 	if (ts.isCallExpression(unwrapped)) {
 		return unwrapped;
@@ -96,7 +96,7 @@ function getNamedGroupsFromExpression(
 	typeChecker: Checker,
 	sourceFile: AST.SourceFile,
 ) {
-	const unwrapped = skipParentheses(node);
+	const unwrapped = unwrapParenthesizedNode(node);
 
 	if (ts.isIdentifier(unwrapped)) {
 		const symbol = typeChecker.getSymbolAtLocation(unwrapped);
@@ -224,7 +224,7 @@ function getRegexInfoFromExpression(
 	typeChecker: Checker,
 	sourceFile: AST.SourceFile,
 ) {
-	const unwrapped = skipParentheses(node);
+	const unwrapped = unwrapParenthesizedNode(node);
 
 	if (ts.isRegularExpressionLiteral(unwrapped)) {
 		return getRegExpLiteralDetails(unwrapped, { sourceFile });
@@ -383,7 +383,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		return {
 			visitors: {
 				ElementAccessExpression: (node, { sourceFile, typeChecker }) => {
-					const argument = skipParentheses(node.argumentExpression);
+					const argument = unwrapParenthesizedNode(node.argumentExpression);
 					if (!ts.isNumericLiteral(argument)) {
 						return;
 					}
@@ -393,7 +393,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 						return;
 					}
 
-					const object = skipParentheses(node.expression);
+					const object = unwrapParenthesizedNode(node.expression);
 					const objectType = typeChecker.getTypeAtLocation(object);
 
 					if (isAnyType(objectType)) {

@@ -1,14 +1,15 @@
 import { SyntaxKind } from "typescript";
 
-import type { AST } from "@flint.fyi/typescript-language";
-
-import { skipParentheses } from "./skipParentheses.ts";
+import {
+	unwrapParenthesizedNode,
+	type AST,
+} from "@flint.fyi/typescript-language";
 
 export function getThisExpression(
 	node: AST.Expression,
 ): AST.ThisExpression | null {
 	while (true) {
-		node = skipParentheses(node);
+		node = unwrapParenthesizedNode(node);
 		if (
 			node.kind === SyntaxKind.CallExpression ||
 			node.kind === SyntaxKind.PropertyAccessExpression ||

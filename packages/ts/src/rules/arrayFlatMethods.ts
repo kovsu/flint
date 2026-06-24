@@ -3,13 +3,13 @@ import * as ts from "typescript";
 import {
 	getTSNodeRange,
 	typescriptLanguage,
+	unwrapParenthesizedNode,
 	type AST,
 	type Checker,
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { isArrayOrTupleTypeAtLocation } from "./utils/isArrayOrTupleTypeAtLocation.ts";
-import { skipParentheses } from "./utils/skipParentheses.ts";
 
 function isConcatApply(node: AST.CallExpression, typeChecker: Checker) {
 	if (
@@ -133,7 +133,7 @@ function isEmptyArrayLiteral(node: AST.Expression) {
 }
 
 function isIdentityArrowFunction(node: AST.Expression) {
-	const expression = skipParentheses(node);
+	const expression = unwrapParenthesizedNode(node);
 
 	if (!ts.isArrowFunction(expression) || expression.parameters.length !== 1) {
 		return false;
@@ -146,7 +146,7 @@ function isIdentityArrowFunction(node: AST.Expression) {
 		return false;
 	}
 
-	const body = skipParentheses(expression.body as AST.Expression);
+	const body = unwrapParenthesizedNode(expression.body as AST.Expression);
 	return (
 		body.kind === ts.SyntaxKind.Identifier && body.text === param.name.text
 	);

@@ -31,6 +31,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - uses: ./.github/actions/prepare
       - run: pnpm run --filter=site prebuild # Generate packages/site/.astro
+      - run: echo "::add-matcher::.github/flint-problem-matcher.json"
       - run: pnpm run flint
 
   lint:

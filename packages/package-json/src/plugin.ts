@@ -6,7 +6,14 @@ import attribution from "./rules/attribution.ts";
 import binNameCasing from "./rules/binNameCasing.ts";
 import dependencyUniqueness from "./rules/dependencyUniqueness.ts";
 import emptyFields from "./rules/emptyFields.ts";
+import exportsSubpathsStyle from "./rules/exportsSubpathsStyle.ts";
+import filesRedundancy from "./rules/filesRedundancy.ts";
+import peerDependenciesInstallation from "./rules/peerDependenciesInstallation.ts";
+import peerDependenciesMetaRelationship from "./rules/peerDependenciesMetaRelationship.ts";
+import privatePackageProperties from "./rules/privatePackageProperties.ts";
 import privatePresence from "./rules/privatePresence.ts";
+import propertyOrder from "./rules/propertyOrder.ts";
+import publishConfigRedundancy from "./rules/publishConfigRedundancy.ts";
 import repositoryDirectoryValidity from "./rules/repositoryDirectoryValidity.ts";
 import repositoryShorthand from "./rules/repositoryShorthand.ts";
 import scriptsNameCasing from "./rules/scriptsNameCasing.ts";
@@ -21,7 +28,14 @@ export const packageJson = createPlugin({
 		binNameCasing,
 		dependencyUniqueness,
 		emptyFields,
+		exportsSubpathsStyle,
+		filesRedundancy,
+		peerDependenciesInstallation,
+		peerDependenciesMetaRelationship,
+		privatePackageProperties,
 		privatePresence,
+		propertyOrder,
+		publishConfigRedundancy,
 		repositoryDirectoryValidity,
 		repositoryShorthand,
 		scriptsNameCasing,

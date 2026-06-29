@@ -1,10 +1,12 @@
-import {
-	type AST,
-	getTSNodeRange,
-	typescriptLanguage,
-} from "@flint.fyi/typescript-language";
 import * as ts from "typescript";
 import { z } from "zod/v4";
+
+import {
+	getStaticNumberValue,
+	getTSNodeRange,
+	typescriptLanguage,
+	type AST,
+} from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -182,10 +184,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					if (
 						!ts.isPropertyAccessExpression(left) ||
 						!sizePropertyNames.has(left.name.text) ||
-						// TODO: Use a util like getStaticValue
-						// https://github.com/flint-fyi/flint/issues/1298
-						!ts.isNumericLiteral(right) ||
-						right.text !== "0"
+						!Object.is(getStaticNumberValue(right), 0)
 					) {
 						return;
 					}

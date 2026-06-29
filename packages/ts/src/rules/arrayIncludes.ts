@@ -1,10 +1,12 @@
+import * as ts from "typescript";
+
 import {
-	type AST,
-	type Checker,
+	getStaticNumberValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
+	type Checker,
 } from "@flint.fyi/typescript-language";
-import * as ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { getConstrainedTypeAtLocation } from "./utils/getConstrainedType.ts";
@@ -53,39 +55,22 @@ function isIndexOfComparison(node: AST.BinaryExpression, typeChecker: Checker) {
 	}
 
 	const kind = operatorToken.kind;
-	const isZeroValue = isZero(comparedValue);
+	const comparedNumber = getStaticNumberValue(comparedValue);
 	const indexOfOnLeft = ts.isCallExpression(left);
 
 	const isValidComparison =
-		(isNegativeOne(comparedValue) &&
+		(comparedNumber === -1 &&
 			(kind === ts.SyntaxKind.ExclamationEqualsToken ||
 				kind === ts.SyntaxKind.ExclamationEqualsEqualsToken ||
 				kind === ts.SyntaxKind.EqualsEqualsToken ||
 				kind === ts.SyntaxKind.EqualsEqualsEqualsToken ||
 				(indexOfOnLeft && kind === ts.SyntaxKind.GreaterThanToken) ||
 				(!indexOfOnLeft && kind === ts.SyntaxKind.LessThanToken))) ||
-		(isZeroValue &&
+		(comparedNumber === 0 &&
 			((indexOfOnLeft && kind === ts.SyntaxKind.GreaterThanEqualsToken) ||
 				(!indexOfOnLeft && kind === ts.SyntaxKind.LessThanEqualsToken)));
 
 	return isValidComparison && { indexOfCall, node };
-}
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function isNegativeOne(node: AST.Expression) {
-	return (
-		ts.isPrefixUnaryExpression(node) &&
-		node.operator === ts.SyntaxKind.MinusToken &&
-		ts.isNumericLiteral(node.operand) &&
-		node.operand.text === "1"
-	);
-}
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function isZero(node: AST.Expression) {
-	return ts.isNumericLiteral(node) && node.text === "0";
 }
 
 export default ruleCreator.createRule(typescriptLanguage, {

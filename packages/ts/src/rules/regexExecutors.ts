@@ -1,15 +1,15 @@
+import ts from "typescript";
+
 import {
-	type AST,
+	getStaticStringValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
-import ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { getConstrainedTypeAtLocation } from "./utils/getConstrainedType.ts";
 
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
 function getRegexFlags(node: AST.Expression, sourceFile: AST.SourceFile) {
 	switch (node.kind) {
 		case ts.SyntaxKind.CallExpression:
@@ -23,11 +23,9 @@ function getRegexFlags(node: AST.Expression, sourceFile: AST.SourceFile) {
 					return "";
 				}
 
-				// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-				const flagsArg = node.arguments[1]!;
-
-				if (ts.isStringLiteral(flagsArg)) {
-					return flagsArg.text;
+				const flagsArg = node.arguments[1];
+				if (flagsArg) {
+					return getStaticStringValue(flagsArg);
 				}
 			}
 

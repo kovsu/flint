@@ -1,10 +1,13 @@
-import { normalizePath } from "@flint.fyi/utils";
 import fs from "node:fs";
 import path from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { normalizePath } from "@flint.fyi/utils";
 
 import { createDiskBackedLinterHost } from "./createDiskBackedLinterHost.ts";
+import { commonlyIgnoredGlobs } from "./watcher.ts";
 
 const INTEGRATION_DIR_NAME = ".flint-disk-backed-linter-host-integration-tests";
 
@@ -34,7 +37,7 @@ describe("createDiskBackedLinterHost", () => {
 		fs.mkdirSync(integrationRoot, { recursive: true });
 	});
 
-	afterEach(() => {
+	afterAll(() => {
 		fs.rmSync(integrationRoot, { force: true, recursive: true });
 	});
 
@@ -112,12 +115,13 @@ describe("createDiskBackedLinterHost", () => {
 		},
 	);
 
-	describe("watchFile", () => {
+	describe("watchFileSync", () => {
 		it("reports creation", async () => {
 			const host = createDiskBackedLinterHost(integrationRoot);
 			const filePath = path.join(integrationRoot, "watch.txt");
 			const onEvent = vi.fn();
 			using _ = host.watchFileSync(filePath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 			});
 
@@ -134,7 +138,7 @@ describe("createDiskBackedLinterHost", () => {
 			const filePath = path.posix.join(integrationRoot, "watch-change.txt");
 			fs.writeFileSync(filePath, "first");
 			const onEvent = vi.fn();
-			using _ = host.watchFileSync(filePath, onEvent);
+			using _ = host.watchFileSync(filePath, onEvent, { ignoredPaths: [] });
 
 			await sleep(50);
 
@@ -149,7 +153,7 @@ describe("createDiskBackedLinterHost", () => {
 			const filePath = path.join(integrationRoot, "watch-delete.txt");
 			fs.writeFileSync(filePath, "first");
 			const onEvent = vi.fn();
-			using _ = host.watchFileSync(filePath, onEvent);
+			using _ = host.watchFileSync(filePath, onEvent, { ignoredPaths: [] });
 
 			await sleep(50);
 
@@ -163,7 +167,10 @@ describe("createDiskBackedLinterHost", () => {
 			const host = createDiskBackedLinterHost(integrationRoot);
 			const filePath = path.join(integrationRoot, "watch-recreate.txt");
 			const onEvent = vi.fn();
-			using _ = host.watchFileSync(filePath, onEvent, { pollingInterval: 10 });
+			using _ = host.watchFileSync(filePath, onEvent, {
+				ignoredPaths: [],
+				pollingInterval: 10,
+			});
 
 			await sleep(50);
 
@@ -191,7 +198,10 @@ describe("createDiskBackedLinterHost", () => {
 			const secondDir = path.join(firstDir, "second");
 			const filePath = path.join(secondDir, "deep.txt");
 			const onEvent = vi.fn();
-			using _ = host.watchFileSync(filePath, onEvent, { pollingInterval: 10 });
+			using _ = host.watchFileSync(filePath, onEvent, {
+				ignoredPaths: [],
+				pollingInterval: 10,
+			});
 
 			await sleep(50);
 
@@ -239,7 +249,7 @@ describe("createDiskBackedLinterHost", () => {
 			const filePath = path.join(integrationRoot, "disposed.txt");
 			const onEvent = vi.fn();
 			{
-				using _ = host.watchFileSync(filePath, onEvent);
+				using _ = host.watchFileSync(filePath, onEvent, { ignoredPaths: [] });
 			}
 
 			fs.writeFileSync(filePath, "content");
@@ -255,6 +265,7 @@ describe("createDiskBackedLinterHost", () => {
 			const onEvent = vi.fn();
 			{
 				using _ = host.watchFileSync(filePath, onEvent, {
+					ignoredPaths: [],
 					pollingInterval: 10,
 				});
 				await sleep(50);
@@ -278,6 +289,7 @@ describe("createDiskBackedLinterHost", () => {
 			fs.writeFileSync(filePath, "first");
 			{
 				using _ = host.watchFileSync(filePath, onEvent, {
+					ignoredPaths: [],
 					pollingInterval: 10,
 				});
 				await sleep(50);
@@ -300,6 +312,7 @@ describe("createDiskBackedLinterHost", () => {
 			const otherPath = path.join(integrationRoot, "other.txt");
 			const onEvent = vi.fn();
 			using _ = host.watchFileSync(targetPath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 			});
 
@@ -317,7 +330,10 @@ describe("createDiskBackedLinterHost", () => {
 			const dirPath = path.join(integrationRoot, "directory");
 			const onEvent = vi.fn();
 			fs.mkdirSync(dirPath, { recursive: true });
-			using _ = host.watchFileSync(dirPath, onEvent, { pollingInterval: 10 });
+			using _ = host.watchFileSync(dirPath, onEvent, {
+				ignoredPaths: [],
+				pollingInterval: 10,
+			});
 
 			await sleep(50);
 
@@ -339,7 +355,10 @@ describe("createDiskBackedLinterHost", () => {
 			const filePath = path.join(dirPath, "file.txt");
 			const onEvent = vi.fn();
 			fs.mkdirSync(dirPath, { recursive: true });
-			using _ = host.watchFileSync(dirPath, onEvent, { pollingInterval: 10 });
+			using _ = host.watchFileSync(dirPath, onEvent, {
+				ignoredPaths: [],
+				pollingInterval: 10,
+			});
 
 			await sleep(50);
 
@@ -350,7 +369,7 @@ describe("createDiskBackedLinterHost", () => {
 		});
 	});
 
-	describe("watchDirectory", () => {
+	describe("watchDirectorySync", () => {
 		it("watches directories non-recursively", async () => {
 			const host = createDiskBackedLinterHost(integrationRoot);
 			const directoryPath = path.join(integrationRoot, "dir");
@@ -359,6 +378,7 @@ describe("createDiskBackedLinterHost", () => {
 
 			const onEvent = vi.fn();
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				recursive: false,
 			});
 
@@ -384,6 +404,7 @@ describe("createDiskBackedLinterHost", () => {
 			fs.writeFileSync(path.join(directoryPath, "existing.txt"), "content");
 			const onEvent = vi.fn();
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				recursive: true,
 			});
 
@@ -404,7 +425,10 @@ describe("createDiskBackedLinterHost", () => {
 			const baseDir = path.join(integrationRoot, "base-git");
 			fs.mkdirSync(baseDir, { recursive: true });
 			const onEvent = vi.fn();
-			using _ = host.watchDirectorySync(baseDir, onEvent, { recursive: true });
+			using _ = host.watchDirectorySync(baseDir, onEvent, {
+				ignoredPaths: [],
+				recursive: true,
+			});
 
 			await sleep(50);
 
@@ -413,9 +437,10 @@ describe("createDiskBackedLinterHost", () => {
 			fs.writeFileSync(path.join(baseDir, "src.txt"), "content");
 
 			const normalizedFile = normalizePath(path.join(baseDir, "src.txt"));
-			await sleep(50);
 
-			expect(onEvent).toHaveBeenCalledWith(normalizedFile);
+			await vi.waitFor(() => {
+				expect(onEvent).toHaveBeenCalledWith(normalizedFile);
+			});
 		});
 
 		it("ignores node_modules directories within watched paths", async () => {
@@ -423,7 +448,10 @@ describe("createDiskBackedLinterHost", () => {
 			const baseDir = path.join(integrationRoot, "base-node-modules");
 			fs.mkdirSync(baseDir, { recursive: true });
 			const onEvent = vi.fn();
-			using _ = host.watchDirectorySync(baseDir, onEvent, { recursive: true });
+			using _ = host.watchDirectorySync(baseDir, onEvent, {
+				ignoredPaths: [],
+				recursive: true,
+			});
 
 			await sleep(50);
 
@@ -437,9 +465,10 @@ describe("createDiskBackedLinterHost", () => {
 			fs.writeFileSync(path.join(baseDir, "src.txt"), "content");
 
 			const normalizedFile = normalizePath(path.join(baseDir, "src.txt"));
-			await sleep(50);
 
-			expect(onEvent).toHaveBeenCalledWith(normalizedFile);
+			await vi.waitFor(() => {
+				expect(onEvent).toHaveBeenCalledWith(normalizedFile);
+			});
 		});
 
 		it("does not ignore lookalike names such as .gitignore", async () => {
@@ -447,7 +476,10 @@ describe("createDiskBackedLinterHost", () => {
 			const baseDir = path.join(integrationRoot, "lookalike");
 			fs.mkdirSync(baseDir, { recursive: true });
 			const onEvent = vi.fn();
-			using _ = host.watchDirectorySync(baseDir, onEvent, { recursive: true });
+			using _ = host.watchDirectorySync(baseDir, onEvent, {
+				ignoredPaths: [],
+				recursive: true,
+			});
 
 			await sleep(50);
 
@@ -466,6 +498,7 @@ describe("createDiskBackedLinterHost", () => {
 			const normalizedDirectory = normalizePath(directoryPath);
 			const onEvent = vi.fn();
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 				recursive: false,
 			});
@@ -487,6 +520,7 @@ describe("createDiskBackedLinterHost", () => {
 			fs.mkdirSync(directoryPath, { recursive: true });
 
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 				recursive: false,
 			});
@@ -514,6 +548,7 @@ describe("createDiskBackedLinterHost", () => {
 			const normalizedSecond = normalizePath(secondFile);
 
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 				recursive: false,
 			});
@@ -539,6 +574,7 @@ describe("createDiskBackedLinterHost", () => {
 			const onEvent = vi.fn();
 			fs.mkdirSync(directoryPath, { recursive: true });
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 				recursive: false,
 			});
@@ -584,6 +620,7 @@ describe("createDiskBackedLinterHost", () => {
 			const subDirectoryPath = normalizePath(path.join(directoryPath, "dir"));
 			const onEvent = vi.fn();
 			using _ = host.watchDirectorySync(directoryPath, onEvent, {
+				ignoredPaths: [],
 				pollingInterval: 10,
 				recursive: false,
 			});
@@ -625,6 +662,75 @@ describe("createDiskBackedLinterHost", () => {
 				expect(onEvent).toHaveBeenCalledWith(directoryPath);
 			});
 			onEvent.mockClear();
+		});
+	});
+
+	describe("glob", () => {
+		it("returns paths relative to options.cwd", async () => {
+			const host = createDiskBackedLinterHost(integrationRoot);
+			fs.mkdirSync(path.join(integrationRoot, "src"), { recursive: true });
+			fs.writeFileSync(path.join(integrationRoot, "src", "file.ts"), "");
+
+			const matches = await host.glob(["**/*.ts"], {
+				cwd: integrationRoot,
+				exclude: [],
+			});
+
+			expect(matches).toEqual(["src/file.ts"]);
+		});
+
+		it("matches dotfiles and dot-directories", async () => {
+			const host = createDiskBackedLinterHost(integrationRoot);
+			fs.mkdirSync(path.join(integrationRoot, ".github"), { recursive: true });
+			fs.mkdirSync(path.join(integrationRoot, ".changeset"), {
+				recursive: true,
+			});
+			fs.writeFileSync(path.join(integrationRoot, ".github", "foo.md"), "");
+			fs.writeFileSync(path.join(integrationRoot, ".changeset", "a.md"), "");
+
+			const matches = await host.glob(["**/*.md"], {
+				cwd: integrationRoot,
+				exclude: [],
+			});
+
+			expect(matches).toContain(".github/foo.md");
+			expect(matches).toContain(".changeset/a.md");
+		});
+
+		it("honors exclude patterns", async () => {
+			const host = createDiskBackedLinterHost(integrationRoot);
+			fs.writeFileSync(path.join(integrationRoot, "keep.ts"), "");
+			fs.writeFileSync(path.join(integrationRoot, "drop.ts"), "");
+
+			const matches = await host.glob(["**/*.ts"], {
+				cwd: integrationRoot,
+				exclude: ["drop.ts"],
+			});
+
+			expect(matches).toEqual(["keep.ts"]);
+		});
+
+		it("prunes commonly-ignored directories when passed as exclude", async () => {
+			const host = createDiskBackedLinterHost(integrationRoot);
+			fs.mkdirSync(path.join(integrationRoot, "node_modules", "pkg"), {
+				recursive: true,
+			});
+			fs.mkdirSync(path.join(integrationRoot, ".git"), { recursive: true });
+			fs.writeFileSync(
+				path.join(integrationRoot, "node_modules", "pkg", "index.ts"),
+				"",
+			);
+			fs.writeFileSync(path.join(integrationRoot, ".git", "config"), "");
+			fs.writeFileSync(path.join(integrationRoot, "src.ts"), "");
+
+			const matches = await host.glob(["**/*"], {
+				cwd: integrationRoot,
+				exclude: commonlyIgnoredGlobs,
+			});
+
+			expect(matches).toContain("src.ts");
+			expect(matches.some((p) => p.startsWith("node_modules/"))).toBe(false);
+			expect(matches.some((p) => p.startsWith(".git/"))).toBe(false);
 		});
 	});
 });

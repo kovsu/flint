@@ -1,9 +1,12 @@
+import * as ts from "typescript";
+
 import {
-	type AST,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
-import * as ts from "typescript";
+
+import { ruleCreator } from "./ruleCreator.ts";
 
 // TODO (#400): Switch to scope analysis
 function getContainingScope(node: ts.Node) {
@@ -24,6 +27,7 @@ function getContainingScope(node: ts.Node) {
 			return current;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type error on the `while` loop. TSESLint bug?
 		current = current.parent as ts.Node | undefined;
 	}
 
@@ -97,8 +101,6 @@ function isLeftHandSide(node: AST.AnyNode) {
 			return false;
 	}
 }
-
-import { ruleCreator } from "./ruleCreator.ts";
 
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {

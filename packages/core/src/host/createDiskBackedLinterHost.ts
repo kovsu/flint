@@ -1,6 +1,9 @@
-import { dirnameKey, normalizePath, pathKey } from "@flint.fyi/utils";
 import fs from "node:fs";
 import path from "node:path";
+
+import { glob as tinyglobby } from "tinyglobby";
+
+import { dirnameKey, normalizePath, pathKey } from "@flint.fyi/utils";
 
 import type {
 	LinterHost,
@@ -8,8 +11,6 @@ import type {
 	LinterHostFileWatcherEvent,
 } from "../types/host.ts";
 import { isFileSystemCaseSensitive } from "./isFileSystemCaseSensitive.ts";
-
-const ignoredPaths = ["/node_modules", "/.git", "/.jj"];
 
 export function createDiskBackedLinterHost(cwd: string): LinterHost {
 	const caseSensitiveFS = isFileSystemCaseSensitive();
@@ -178,6 +179,14 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 		getFileTouchTimeSync(filePath) {
 			return fs.statSync(filePath).mtimeMs;
 		},
+		async glob(patterns, options) {
+			const entries = await tinyglobby(patterns, {
+				cwd: options.cwd,
+				dot: true,
+				ignore: options.exclude,
+			});
+			return entries.map((entry) => normalizePath(entry));
+		},
 		isCaseSensitiveFS() {
 			return caseSensitiveFS;
 		},
@@ -268,7 +277,7 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 						if (changedKey.startsWith(dirKeySlash)) {
 							relative = relative.slice(directoryPathAbsolute.length);
 						}
-						for (const ignored of ignoredPaths) {
+						for (const ignored of options.ignoredPaths) {
 							if (
 								relative.endsWith(ignored) ||
 								relative.includes(ignored + "/")
@@ -287,7 +296,7 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 			return createWatcher(
 				filePathAbsolute,
 				false,
-				options?.pollingInterval ?? 2_000,
+				options.pollingInterval ?? 2_000,
 				(normalizedChangedFilePath, event) => {
 					if (
 						normalizedChangedFilePath != null &&
@@ -299,9 +308,16 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 			);
 		},
 		async writeFile(filePathAbsolute, content) {
+			// Create missing parent directories so a single writeFile call always
+			// succeeds, with no separate mkdir step for callers.
+			await fs.promises.mkdir(path.dirname(filePathAbsolute), {
+				recursive: true,
+			});
+
 			await fs.promises.writeFile(filePathAbsolute, content, "utf8");
 		},
 		writeFileSync(filePathAbsolute, content) {
+			fs.mkdirSync(path.dirname(filePathAbsolute), { recursive: true });
 			fs.writeFileSync(filePathAbsolute, content, "utf8");
 		},
 	};

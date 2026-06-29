@@ -1,9 +1,13 @@
+import { SyntaxKind } from "typescript";
+
 import {
-	type AST,
+	getStaticStringValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
-import { SyntaxKind } from "typescript";
+
+import { ruleCreator } from "./ruleCreator.ts";
 
 const validTypeofValues = new Set([
 	"bigint",
@@ -16,20 +20,9 @@ const validTypeofValues = new Set([
 	"undefined",
 ]);
 
-// TODO: Reuse a shared getStaticValue-style utility?
-// https://github.com/flint-fyi/flint/issues/1298
-function getStringValue(node: AST.Expression) {
-	return node.kind === SyntaxKind.StringLiteral ||
-		node.kind === SyntaxKind.NoSubstitutionTemplateLiteral
-		? node.text
-		: undefined;
-}
-
 function getTypeofOperand(node: AST.Expression) {
 	return node.kind === SyntaxKind.TypeOfExpression && node.expression;
 }
-
-import { ruleCreator } from "./ruleCreator.ts";
 
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
@@ -69,8 +62,8 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			const stringValue = getStringValue(comparisonValue);
-			if (stringValue != null && !validTypeofValues.has(stringValue)) {
+			const stringValue = getStaticStringValue(comparisonValue);
+			if (stringValue !== undefined && !validTypeofValues.has(stringValue)) {
 				context.report({
 					message: "invalidValue",
 					range: getTSNodeRange(comparisonValue, sourceFile),

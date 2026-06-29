@@ -1,11 +1,12 @@
 import {
-	type AST as RegExpAST,
 	visitRegExpAST,
+	type AST as RegExpAST,
 } from "@eslint-community/regexpp";
-import { typescriptLanguage } from "@flint.fyi/typescript-language";
-import type {
-	AST,
-	TypeScriptFileServices,
+
+import {
+	typescriptLanguage,
+	type AST,
+	type TypeScriptFileServices,
 } from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
@@ -113,6 +114,7 @@ function isOptionalAssertion(
 				break;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type errors above. TSESLint bug?
 		current = parent as RegExpAST.Node;
 	}
 

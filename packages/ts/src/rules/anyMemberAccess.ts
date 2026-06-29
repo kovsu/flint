@@ -1,11 +1,12 @@
-import {
-	type AST,
-	type Checker,
-	getTSNodeRange,
-	typescriptLanguage,
-} from "@flint.fyi/typescript-language";
 import * as tsutils from "ts-api-utils";
 import * as ts from "typescript";
+
+import {
+	getTSNodeRange,
+	typescriptLanguage,
+	type AST,
+	type Checker,
+} from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { getConstrainedTypeAtLocation } from "./utils/getConstrainedType.ts";
@@ -48,6 +49,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					return true;
 				}
 
+				// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type error on the `while` loop. TSESLint bug?
 				current = current.parent as ts.Node | undefined;
 			}
 

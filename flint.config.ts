@@ -13,14 +13,18 @@ export default defineConfig({
 				exclude: ["packages/e2e/tests/**/package.json"],
 				include: packageJson.files.all,
 			},
-			rules: [packageJson.presets.logical, packageJson.presets.stylistic],
+			rules: [
+				packageJson.presets.logical,
+				packageJson.presets.sorting,
+				packageJson.presets.stylistic,
+			],
 		},
 		{
 			files: json.files.all,
 			rules: json.presets.logical,
 		},
 		{
-			files: [md.files.all, ".changeset/*.md", ".github/**/*.md"],
+			files: md.files.all,
 			rules: md.presets.logicalStrict,
 		},
 		{
@@ -54,6 +58,10 @@ export default defineConfig({
 				include: yaml.files.all,
 			},
 			rules: yaml.presets.logical,
+		},
+		{
+			files: [".github/workflows/*.yaml"],
+			rules: [yaml.rules({ stringMappingKeys: false })],
 		},
 		{
 			files: [globs.all, "**/*.mdx"],

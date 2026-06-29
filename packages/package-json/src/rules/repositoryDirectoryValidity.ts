@@ -1,6 +1,5 @@
-import { getJsonNodeRange, jsonLanguage } from "@flint.fyi/json-language";
+import { getNodeRange, jsonLanguage } from "@flint.fyi/json-language";
 import { normalizeDirname } from "@flint.fyi/utils";
-import { SyntaxKind } from "typescript";
 
 import { getPackagePropertyOfName } from "../getPackagePropertyOfName.ts";
 import { ruleCreator } from "../ruleCreator.ts";
@@ -25,40 +24,29 @@ export default ruleCreator.createRule(jsonLanguage, {
 	setup(context) {
 		return {
 			visitors: {
-				JsonSourceFile(node, { sourceFile }) {
+				Document(node, { filePath }) {
 					const repository = getPackagePropertyOfName(node, "repository");
-					if (
-						repository?.kind !== SyntaxKind.PropertyAssignment ||
-						repository.initializer.kind !== SyntaxKind.ObjectLiteralExpression
-					) {
+					if (repository?.value.type !== "Object") {
 						return;
 					}
 
-					const directory = repository.initializer.properties.find(
+					const directory = repository.value.members.find(
 						(property) =>
-							property.kind === SyntaxKind.PropertyAssignment &&
-							property.name.kind === SyntaxKind.StringLiteral &&
-							property.name.text === "directory",
+							property.name.type === "String" &&
+							property.name.value === "directory",
 					);
 
-					if (
-						directory?.kind !== SyntaxKind.PropertyAssignment ||
-						directory.initializer.kind !== SyntaxKind.StringLiteral
-					) {
+					if (directory?.value.type !== "String") {
 						return;
 					}
 
-					const currentDirectory = context.host.getCurrentDirectory();
-					const relativeFileName = sourceFile.fileName.slice(
-						currentDirectory.length + (currentDirectory.endsWith("/") ? 0 : 1),
-					);
-					const expectedDirectory = normalizeDirname(relativeFileName);
+					const expectedDirectory = normalizeDirname(filePath);
 
-					if (directory.initializer.text === expectedDirectory) {
+					if (directory.value.value === expectedDirectory) {
 						return;
 					}
 
-					const range = getJsonNodeRange(directory.initializer, sourceFile);
+					const range = getNodeRange(directory.value);
 
 					context.report({
 						message: "mismatchedDirectory",

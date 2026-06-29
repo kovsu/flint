@@ -1,10 +1,11 @@
-import {
-	type AST,
-	getTSNodeRange,
-	typescriptLanguage,
-} from "@flint.fyi/typescript-language";
 import * as tsutils from "ts-api-utils";
 import ts from "typescript";
+
+import {
+	getTSNodeRange,
+	typescriptLanguage,
+	type AST,
+} from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -93,6 +94,7 @@ function isDescendantOf(node: AST.AnyNode, potentialAncestor: ts.Node) {
 			return true;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type error on the `while` loop. TSESLint bug?
 		current = current.parent as ts.Node | undefined;
 	}
 
@@ -119,6 +121,7 @@ function isNodeInsideReturnType(node: AST.AnyNode) {
 			return !!current.type && isDescendantOf(node, current.type);
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type error on the `while` loop. TSESLint bug?
 		current = current.parent as AST.AnyNode | undefined;
 	}
 

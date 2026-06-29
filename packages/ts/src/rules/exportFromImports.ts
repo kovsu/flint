@@ -1,9 +1,11 @@
+import ts from "typescript";
+
 import {
-	type AST,
+	getStaticStringValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
-import ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -23,11 +25,9 @@ function getImportInfo(
 		return undefined;
 	}
 
-	// TODO: Use a util like getStaticValue
-	// https://github.com/flint-fyi/flint/issues/1298
-	const moduleSpecifier = ts.isStringLiteral(node.moduleSpecifier)
-		? node.moduleSpecifier.text
-		: node.moduleSpecifier.getText(sourceFile);
+	const moduleSpecifier =
+		getStaticStringValue(node.moduleSpecifier) ??
+		node.moduleSpecifier.getText(sourceFile);
 
 	const info: ImportInfo = {
 		declaration: node,

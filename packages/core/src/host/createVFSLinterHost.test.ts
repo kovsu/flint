@@ -351,7 +351,9 @@ describe(createVFSLinterHost, () => {
 			const host = createVFSLinterHost({ caseSensitive: true, cwd: "/root" });
 			const onEvent = vi.fn();
 
-			using _ = host.watchFileSync("/root/file.txt", onEvent);
+			using _ = host.watchFileSync("/root/file.txt", onEvent, {
+				ignoredPaths: [],
+			});
 
 			expect(onEvent).not.toHaveBeenCalled();
 
@@ -365,7 +367,9 @@ describe(createVFSLinterHost, () => {
 			const onEvent = vi.fn();
 
 			host.vfsUpsertFile("/root/file.txt", "content");
-			using _ = host.watchFileSync("/root/file.txt", onEvent);
+			using _ = host.watchFileSync("/root/file.txt", onEvent, {
+				ignoredPaths: [],
+			});
 
 			expect(onEvent).not.toHaveBeenCalled();
 
@@ -379,7 +383,9 @@ describe(createVFSLinterHost, () => {
 			const onEvent = vi.fn();
 
 			host.vfsUpsertFile("/root/file.txt", "content");
-			using _ = host.watchFileSync("/root/file.txt", onEvent);
+			using _ = host.watchFileSync("/root/file.txt", onEvent, {
+				ignoredPaths: [],
+			});
 
 			expect(onEvent).not.toHaveBeenCalled();
 
@@ -393,7 +399,9 @@ describe(createVFSLinterHost, () => {
 			const onEvent = vi.fn();
 
 			{
-				using _ = host.watchFileSync("/root/file.txt", onEvent);
+				using _ = host.watchFileSync("/root/file.txt", onEvent, {
+					ignoredPaths: [],
+				});
 			}
 			host.vfsUpsertFile("/root/file.txt", "content");
 
@@ -408,7 +416,9 @@ describe(createVFSLinterHost, () => {
 			const host = createVFSLinterHost({ baseHost });
 			const onEvent = vi.fn();
 
-			using _ = host.watchFileSync("/root/file.txt", onEvent);
+			using _ = host.watchFileSync("/root/file.txt", onEvent, {
+				ignoredPaths: [],
+			});
 
 			expect(onEvent).not.toHaveBeenCalled();
 
@@ -427,6 +437,7 @@ describe(createVFSLinterHost, () => {
 			const host = createVFSLinterHost({ baseHost });
 
 			using _ = host.watchFileSync("/root/file.txt", vi.fn(), {
+				ignoredPaths: [],
 				pollingInterval: 555,
 			});
 
@@ -434,6 +445,7 @@ describe(createVFSLinterHost, () => {
 				"/root/file.txt",
 				expect.any(Function),
 				{
+					ignoredPaths: [],
 					pollingInterval: 555,
 				},
 			);
@@ -448,7 +460,9 @@ describe(createVFSLinterHost, () => {
 			const host = createVFSLinterHost({ baseHost });
 
 			{
-				using _ = host.watchFileSync("/root/file.txt", vi.fn());
+				using _ = host.watchFileSync("/root/file.txt", vi.fn(), {
+					ignoredPaths: [],
+				});
 
 				expect(dispose).not.toHaveBeenCalled();
 			}
@@ -467,6 +481,7 @@ describe(createVFSLinterHost, () => {
 				const onEvent = vi.fn();
 
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: false,
 				});
 				host.vfsUpsertFile("/root/file.txt", "content");
@@ -482,6 +497,7 @@ describe(createVFSLinterHost, () => {
 				const onEvent = vi.fn();
 
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: false,
 				});
 				host.vfsUpsertFile("/root/dir/file.txt", "content");
@@ -496,7 +512,10 @@ describe(createVFSLinterHost, () => {
 				});
 				const onEvent = vi.fn();
 
-				using _ = host.watchDirectorySync("/", onEvent, { recursive: false });
+				using _ = host.watchDirectorySync("/", onEvent, {
+					ignoredPaths: [],
+					recursive: false,
+				});
 				host.vfsUpsertFile("/root/dir/file.txt", "content");
 
 				expect(onEvent).toHaveBeenCalledExactlyOnceWith("/root");
@@ -510,6 +529,7 @@ describe(createVFSLinterHost, () => {
 				const onEvent = vi.fn();
 
 				using _ = host.watchDirectorySync("C:\\", onEvent, {
+					ignoredPaths: [],
 					recursive: false,
 				});
 				host.vfsUpsertFile("C:\\file.txt", "content");
@@ -526,6 +546,7 @@ describe(createVFSLinterHost, () => {
 
 				host.vfsUpsertFile("/root/file.txt", "content");
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: false,
 				});
 
@@ -545,6 +566,7 @@ describe(createVFSLinterHost, () => {
 
 				host.vfsUpsertFile("/root/file.txt", "content");
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: false,
 				});
 
@@ -564,6 +586,7 @@ describe(createVFSLinterHost, () => {
 
 				host.vfsUpsertFile("/root/nested/file.txt", "content");
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: false,
 				});
 
@@ -584,6 +607,7 @@ describe(createVFSLinterHost, () => {
 				const onEvent = vi.fn();
 
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: true,
 				});
 
@@ -603,6 +627,7 @@ describe(createVFSLinterHost, () => {
 
 				host.vfsUpsertFile("/root/nested/file.txt", "content");
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: true,
 				});
 
@@ -624,6 +649,7 @@ describe(createVFSLinterHost, () => {
 
 				host.vfsUpsertFile("/root/nested/file.txt", "content");
 				using _ = host.watchDirectorySync("/root", onEvent, {
+					ignoredPaths: [],
 					recursive: true,
 				});
 
@@ -647,6 +673,7 @@ describe(createVFSLinterHost, () => {
 			const host = createVFSLinterHost({ baseHost });
 
 			using _ = host.watchDirectorySync("/root/file.txt", vi.fn(), {
+				ignoredPaths: [],
 				pollingInterval: 555,
 				recursive: false,
 			});
@@ -655,6 +682,7 @@ describe(createVFSLinterHost, () => {
 				"/root/file.txt",
 				expect.any(Function),
 				{
+					ignoredPaths: [],
 					pollingInterval: 555,
 					recursive: false,
 				},
@@ -671,6 +699,7 @@ describe(createVFSLinterHost, () => {
 
 			{
 				using _ = host.watchDirectorySync("/root/file.txt", vi.fn(), {
+					ignoredPaths: [],
 					recursive: false,
 				});
 
@@ -678,6 +707,100 @@ describe(createVFSLinterHost, () => {
 			}
 
 			expect(dispose).toHaveBeenCalledExactlyOnceWith();
+		});
+	});
+
+	describe("glob", () => {
+		it("returns overlay paths relative to options.cwd", async () => {
+			const host = createVFSLinterHost({ caseSensitive: true, cwd: "/root" });
+			host.vfsUpsertFile("/root/src/file.ts", "");
+			host.vfsUpsertFile("/root/readme.md", "");
+
+			const matches = await host.glob(["**/*.ts"], {
+				cwd: "/root",
+				exclude: [],
+			});
+
+			expect(matches).toEqual(["src/file.ts"]);
+		});
+
+		it("merges base host results as relative paths", async () => {
+			const baseHost = createVFSLinterHost({
+				caseSensitive: true,
+				cwd: "/root",
+			});
+			baseHost.vfsUpsertFile("/root/shared.ts", "");
+			baseHost.vfsUpsertFile("/root/base-only.ts", "");
+			const host = createVFSLinterHost({ baseHost });
+			host.vfsUpsertFile("/root/overlay-only.ts", "");
+
+			const matches = await host.glob(["**/*.ts"], {
+				cwd: "/root",
+				exclude: [],
+			});
+
+			expect(matches.toSorted()).toEqual([
+				"base-only.ts",
+				"overlay-only.ts",
+				"shared.ts",
+			]);
+		});
+
+		it("lets an overlay entry shadow a base host entry at the same relative path", async () => {
+			const baseHost = createVFSLinterHost({
+				caseSensitive: true,
+				cwd: "/root",
+			});
+			baseHost.vfsUpsertFile("/root/shadowed.ts", "base");
+			const host = createVFSLinterHost({ baseHost });
+			host.vfsUpsertFile("/root/shadowed.ts", "overlay");
+
+			const matches = await host.glob(["**/*.ts"], {
+				cwd: "/root",
+				exclude: [],
+			});
+
+			expect(matches).toEqual(["shadowed.ts"]);
+			expect(host.readFileSync("/root/shadowed.ts")).toEqual("overlay");
+		});
+
+		it("matches dotfiles and dot-directories", async () => {
+			const host = createVFSLinterHost({ caseSensitive: true, cwd: "/root" });
+			host.vfsUpsertFile("/root/.github/foo.md", "");
+			host.vfsUpsertFile("/root/.changeset/a.md", "");
+
+			const matches = await host.glob(["**/*.md"], {
+				cwd: "/root",
+				exclude: [],
+			});
+
+			expect(matches.toSorted()).toEqual([".changeset/a.md", ".github/foo.md"]);
+		});
+
+		it("honors exclude patterns against dot-paths", async () => {
+			const host = createVFSLinterHost({ caseSensitive: true, cwd: "/root" });
+			host.vfsUpsertFile("/root/.github/keep.md", "");
+			host.vfsUpsertFile("/root/.github/drop.md", "");
+
+			const matches = await host.glob(["**/*.md"], {
+				cwd: "/root",
+				exclude: [".github/drop.md"],
+			});
+
+			expect(matches).toEqual([".github/keep.md"]);
+		});
+
+		it("does not return files outside cwd", async () => {
+			const host = createVFSLinterHost({ caseSensitive: true, cwd: "/root" });
+			host.vfsUpsertFile("/root/inside.ts", "");
+			host.vfsUpsertFile("/elsewhere/outside.ts", "");
+
+			const matches = await host.glob(["**/*.ts"], {
+				cwd: "/root",
+				exclude: [],
+			});
+
+			expect(matches).toEqual(["inside.ts"]);
 		});
 	});
 });

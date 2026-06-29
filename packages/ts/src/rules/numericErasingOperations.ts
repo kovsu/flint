@@ -1,17 +1,16 @@
+import ts from "typescript";
+
 import {
-	type AST,
+	getStaticNumberValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
-import ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-// ...and then update tests to notice when a type-static zero is in play!
 function isZeroLiteral(node: AST.Expression) {
-	return node.kind === ts.SyntaxKind.NumericLiteral && node.text === "0";
+	return Object.is(getStaticNumberValue(node), 0);
 }
 
 export default ruleCreator.createRule(typescriptLanguage, {

@@ -1,10 +1,12 @@
+import * as ts from "typescript";
+
 import {
-	type AST,
-	type Checker,
+	getStaticNumberValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
+	type Checker,
 } from "@flint.fyi/typescript-language";
-import * as ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { isArrayOrTupleTypeAtLocation } from "./utils/isArrayOrTupleTypeAtLocation.ts";
@@ -21,23 +23,6 @@ function isArrayFilterCall(
 		node.arguments.length <= 2 &&
 		isArrayOrTupleTypeAtLocation(node.expression.expression, typeChecker)
 	);
-}
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function isNegativeOneIndex(node: AST.Expression): boolean {
-	return (
-		ts.isPrefixUnaryExpression(node) &&
-		node.operator === ts.SyntaxKind.MinusToken &&
-		ts.isNumericLiteral(node.operand) &&
-		node.operand.text === "1"
-	);
-}
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function isZeroIndex(node: AST.Expression) {
-	return ts.isNumericLiteral(node) && node.text === "0";
 }
 
 export default ruleCreator.createRule(typescriptLanguage, {
@@ -110,7 +95,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 								const arg = node.arguments[0]!;
 
 								if (
-									isZeroIndex(arg) &&
+									getStaticNumberValue(arg) === 0 &&
 									isArrayFilterCall(objectExpression, typeChecker)
 								) {
 									context.report({
@@ -121,7 +106,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 								}
 
 								if (
-									isNegativeOneIndex(arg) &&
+									getStaticNumberValue(arg) === -1 &&
 									isArrayFilterCall(objectExpression, typeChecker)
 								) {
 									context.report({
@@ -134,7 +119,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				},
 				ElementAccessExpression: (node, { sourceFile, typeChecker }) => {
 					if (
-						isZeroIndex(node.argumentExpression) &&
+						getStaticNumberValue(node.argumentExpression) === 0 &&
 						isArrayFilterCall(node.expression, typeChecker)
 					) {
 						context.report({

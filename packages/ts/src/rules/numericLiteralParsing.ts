@@ -1,11 +1,16 @@
+import { SyntaxKind } from "typescript";
+
 import {
-	type AST,
+	getStaticNumberValue,
+	getStaticStringValue,
 	getTSNodeRange,
 	isGlobalDeclaration,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
 import { nullThrows } from "@flint.fyi/utils";
-import { SyntaxKind } from "typescript";
+
+import { ruleCreator } from "./ruleCreator.ts";
 
 function convertToLiteral(value: string, radix: number): string {
 	const parsed = Number.parseInt(value, radix);
@@ -24,30 +29,6 @@ function convertToLiteral(value: string, radix: number): string {
 			return value;
 	}
 }
-
-function getRadixValue(node: AST.Expression): number | undefined {
-	if (node.kind !== SyntaxKind.NumericLiteral) {
-		return undefined;
-	}
-
-	const value = Number(node.text);
-	if (![2, 8, 16].includes(value)) {
-		return undefined;
-	}
-
-	return value;
-}
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function getStringValue(node: AST.Expression): string | undefined {
-	return node.kind === SyntaxKind.StringLiteral ||
-		node.kind === SyntaxKind.NoSubstitutionTemplateLiteral
-		? node.text
-		: undefined;
-}
-
-import { ruleCreator } from "./ruleCreator.ts";
 
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
@@ -75,7 +56,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			const stringValue = getStringValue(
+			const stringValue = getStaticStringValue(
 				nullThrows(
 					node.arguments[0],
 					"First argument is expected to be present by prior length check",
@@ -85,13 +66,13 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			const radixValue = getRadixValue(
+			const radixValue = getStaticNumberValue(
 				nullThrows(
 					node.arguments[1],
 					"Second argument is expected to be present by prior length check",
 				),
 			);
-			if (!radixValue) {
+			if (radixValue === undefined || ![2, 8, 16].includes(radixValue)) {
 				return;
 			}
 

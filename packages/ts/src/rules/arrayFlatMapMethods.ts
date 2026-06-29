@@ -1,10 +1,12 @@
+import * as ts from "typescript";
+
 import {
-	type AST,
-	type Checker,
+	getStaticNumberValue,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
+	type Checker,
 } from "@flint.fyi/typescript-language";
-import * as ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { isArrayOrTupleTypeAtLocation } from "./utils/isArrayOrTupleTypeAtLocation.ts";
@@ -31,9 +33,7 @@ function isFlatCallWithDepthOne(node: AST.CallExpression) {
 			// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 			const firstArgument = node.arguments[0]!;
 
-			// TODO: Use a util like getStaticValue
-			// https://github.com/flint-fyi/flint/issues/1298
-			return ts.isNumericLiteral(firstArgument) && firstArgument.text === "1";
+			return getStaticNumberValue(firstArgument) === 1;
 		}
 
 		default:

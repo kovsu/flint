@@ -1,11 +1,15 @@
+import { SyntaxKind } from "typescript";
+
 import {
-	type AST,
+	getStaticStringValue,
 	getTSNodeRange,
-	type TypeScriptFileServices,
 	typescriptLanguage,
+	type AST,
+	type TypeScriptFileServices,
 } from "@flint.fyi/typescript-language";
 import { nullThrows } from "@flint.fyi/utils";
-import { SyntaxKind } from "typescript";
+
+import { ruleCreator } from "./ruleCreator.ts";
 
 const validAutocompleteValues = new Set([
 	"address-level1",
@@ -100,8 +104,6 @@ function isValidAutocompleteValue(value: string): boolean {
 	return false;
 }
 
-import { ruleCreator } from "./ruleCreator.ts";
-
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
 		description:
@@ -153,7 +155,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 				return;
 			}
 
-			const value = getStringLiteralValue(autocomplete.initializer);
+			const value = getStaticStringValue(autocomplete.initializer);
 			if (value === undefined || isValidAutocompleteValue(value)) {
 				return;
 			}
@@ -173,20 +175,3 @@ export default ruleCreator.createRule(typescriptLanguage, {
 		};
 	},
 });
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function getStringLiteralValue(node: AST.Expression): string | undefined {
-	if (node.kind === SyntaxKind.StringLiteral) {
-		return node.text;
-	}
-
-	if (
-		node.kind === SyntaxKind.NoSubstitutionTemplateLiteral &&
-		node.parent.kind !== SyntaxKind.TaggedTemplateExpression
-	) {
-		return node.text;
-	}
-
-	return undefined;
-}

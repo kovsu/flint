@@ -10,27 +10,29 @@
 	},
 	"license": "MIT",
 	"author": {
-		"name": "Josh Goldberg ✨",
-		"email": "npm@joshuakgoldberg.com"
+		"name": "Flint Team",
+		"url": "https://flint.fyi/team"
 	},
 	"type": "module",
 	"scripts": {
 		"build": "tsdown",
-		"clean": "rimraf -g \"**/node_modules\"",
 		"flint": "node packages/flint/bin/index.js",
 		"flint:cache-ignore": "node packages/flint/bin/index.js --cache-ignore",
 		"lint": "eslint . --max-warnings 0",
 		"lint:knip": "knip",
 		"lint:knip:prod": "knip --strict",
 		"prepare": "husky",
+		"release": "pnpm build && pnpm -r publish",
 		"start:site": "pnpm --filter=site prebuild && pnpm --filter=site start",
 		"test": "vitest"
 	},
 	"devDependencies": {
 		"@arethetypeswrong/core": "catalog:dev",
+		"@changesets/changelog-github": "catalog:dev",
 		"@changesets/cli": "catalog:dev",
 		"@eslint-community/eslint-plugin-eslint-comments": "catalog:dev",
 		"@eslint/js": "catalog:dev",
+		"@eslint/json": "2.0.0",
 		"@eslint/markdown": "catalog:dev",
 		"@flint.fyi/node": "workspace:^",
 		"@flint.fyi/performance": "workspace:^",
@@ -38,6 +40,7 @@
 		"@flint.fyi/spelling": "workspace:^",
 		"@flint.fyi/ts-patch": "workspace:^",
 		"@flint.fyi/vitest": "workspace:^",
+		"@ianvs/prettier-plugin-sort-imports": "4.7.1",
 		"@types/node": "catalog:dev",
 		"@vitest/coverage-v8": "catalog:dev",
 		"@vitest/eslint-plugin": "catalog:dev",
@@ -61,14 +64,18 @@
 		"prettier-plugin-packagejson": "catalog:dev",
 		"prettier-plugin-sentences-per-line": "catalog:dev",
 		"prettier-plugin-sh": "catalog:dev",
-		"rimraf": "catalog:dev",
 		"tsdown": "catalog:dev",
 		"typescript": "catalog:dev",
 		"typescript-eslint": "catalog:dev",
 		"vitest": "catalog:dev"
 	},
-	"packageManager": "pnpm@10.33.0",
 	"engines": {
 		"node": ">=24.0.0"
+	},
+	"devEngines": {
+		"packageManager": {
+			"name": "pnpm",
+			"version": "11.9.0"
+		}
 	}
 }

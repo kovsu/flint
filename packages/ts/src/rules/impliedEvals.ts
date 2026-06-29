@@ -1,12 +1,13 @@
-import {
-	type AST,
-	type Checker,
-	getTSNodeRange,
-	type TypeScriptFileServices,
-	typescriptLanguage,
-} from "@flint.fyi/typescript-language";
 import * as tsutils from "ts-api-utils";
 import * as ts from "typescript";
+
+import {
+	getTSNodeRange,
+	typescriptLanguage,
+	type AST,
+	type Checker,
+	type TypeScriptFileServices,
+} from "@flint.fyi/typescript-language";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { isBuiltinSymbolLike } from "./utils/isBuiltinSymbolLike.ts";
@@ -168,6 +169,8 @@ function isReferenceToGlobalFunction(
 	return !!symbol.getDeclarations()?.some((declaration) => {
 		const sourceFile = declaration.getSourceFile();
 		return (
+			// flint-disable-lines-begin ts/deprecated -- https://github.com/flint-fyi/flint/issues/3057
+			// eslint-disable-next-line @typescript-eslint/no-deprecated -- https://github.com/flint-fyi/flint/issues/3057
 			sourceFile.hasNoDefaultLib ||
 			sourceFile.fileName.includes("node_modules/@types/node/") ||
 			/\/lib\.[^/]*\.d\.ts$/.test(sourceFile.fileName)

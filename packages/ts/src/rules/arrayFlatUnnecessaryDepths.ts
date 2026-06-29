@@ -1,8 +1,10 @@
+import * as ts from "typescript";
+
 import {
+	getStaticNumberValue,
 	getTSNodeRange,
 	typescriptLanguage,
 } from "@flint.fyi/typescript-language";
-import * as ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 import { isArrayOrTupleTypeAtLocation } from "./utils/isArrayOrTupleTypeAtLocation.ts";
@@ -38,9 +40,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 					const arg = node.arguments[0]!;
 
-					// TODO: Use a util like getStaticValue
-					// https://github.com/flint-fyi/flint/issues/1298
-					if (!ts.isNumericLiteral(arg) || arg.text !== "1") {
+					if (getStaticNumberValue(arg) !== 1) {
 						return;
 					}
 

@@ -1,9 +1,10 @@
+import * as ts from "typescript";
+
 import {
-	type AST,
 	getTSNodeRange,
 	typescriptLanguage,
+	type AST,
 } from "@flint.fyi/typescript-language";
-import * as ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -483,7 +484,7 @@ function isInsideHeritageClause(node: AST.AnyNode) {
 		if (ts.isSourceFile(current) || ts.isClassDeclaration(current)) {
 			break;
 		}
-
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type error on the `while` loop. TSESLint bug?
 		current = current.parent as ts.Node | undefined;
 	}
 
@@ -515,6 +516,7 @@ function isInsideImport(node: AST.AnyNode) {
 			return false;
 		}
 
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- removing causes type error on the `while` loop. TSESLint bug?
 		current = current.parent as ts.Node | undefined;
 	}
 

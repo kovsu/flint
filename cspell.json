@@ -54,6 +54,7 @@
 		"constructables",
 		"contentinfo",
 		"Corsa",
+		"csstree",
 		"deoptimizations",
 		"destructures",
 		"dgimsuyv",
@@ -95,6 +96,7 @@
 		"Oxlint",
 		"precomposed",
 		"prefault",
+		"qwik",
 		"rearchitectures",
 		"recurser",
 		"roletype",
@@ -122,7 +124,6 @@
 		"webauthn",
 		"WHATWG",
 		"xdescribe",
-		"xobi",
 		"xobi",
 		"xtest",
 		"Yosuke"

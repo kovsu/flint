@@ -1,13 +1,14 @@
+import ts, { SyntaxKind } from "typescript";
+
 import {
-	type AST,
-	type Checker,
+	getStaticStringValue,
 	getTSNodeRange,
 	isGlobalDeclarationOfName,
-	type TypeScriptFileServices,
 	typescriptLanguage,
+	type AST,
+	type Checker,
+	type TypeScriptFileServices,
 } from "@flint.fyi/typescript-language";
-import { SyntaxKind } from "typescript";
-import ts from "typescript";
 
 import { ruleCreator } from "./ruleCreator.ts";
 
@@ -49,22 +50,9 @@ function hasValidMessageArgument(
 
 	return (
 		!!firstArgument &&
-		!isEmptyString(firstArgument) &&
+		getStaticStringValue(firstArgument) !== "" &&
 		!isUndefinedLiteral(firstArgument)
 	);
-}
-
-// TODO: Use a util like getStaticValue
-// https://github.com/flint-fyi/flint/issues/1298
-function isEmptyString(node: AST.Expression) {
-	if (
-		node.kind === SyntaxKind.StringLiteral ||
-		node.kind === SyntaxKind.NoSubstitutionTemplateLiteral
-	) {
-		return node.text === "";
-	}
-
-	return false;
 }
 
 function isUndefinedLiteral(node: AST.Expression) {

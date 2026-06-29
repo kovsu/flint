@@ -46,9 +46,9 @@ export async function runCli(args: string[]) {
 			"    Whether to run Flint with an interactive 'one file at a time' viewer.",
 		);
 		console.log("");
-		console.log("  --presenter <brief|detailed>");
+		console.log("  --presenter <brief|detailed|rdjson>");
 		console.log(
-			"    Which 'presenter' to output results using: brief (default) or detailed.",
+			"    Which 'presenter' to output results using: brief (default), detailed, or rdjson.",
 		);
 		console.log("");
 		console.log("  --skip-formatting");
@@ -92,7 +92,7 @@ export async function runCli(args: string[]) {
 		return 2;
 	}
 
-	const getRenderer = await createRendererFactory(host, configFileName, values);
+	const getRenderer = createRendererFactory(host, configFileName, values);
 
 	if (values.watch) {
 		await runCliWatch(host, configFileName, getRenderer, values);

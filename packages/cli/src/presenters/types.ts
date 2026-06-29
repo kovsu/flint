@@ -6,9 +6,9 @@ import type {
 } from "@flint.fyi/core";
 
 export interface Presenter {
-	header?: string[];
+	header: string[];
 	renderFile(context: PresenterFileContext): RenderGenerator;
-	summarize?(context: PresenterSummarizeContext): RenderGenerator;
+	summarize(context: PresenterSummarizeContext): RenderGenerator;
 }
 
 export interface PresenterAbout {
@@ -44,6 +44,4 @@ export interface PresenterVirtualFile {
 	text: string;
 }
 
-export type RenderGenerator =
-	| AsyncGenerator<string, void, unknown>
-	| Generator<string, void, unknown>;
+export type RenderGenerator = AsyncIterable<string> | Iterable<string>;

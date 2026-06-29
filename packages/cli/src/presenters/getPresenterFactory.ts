@@ -1,11 +1,11 @@
 import type { OptionsValues } from "../options.ts";
 import { briefPresenterFactory } from "./briefPresenterFactory.ts";
 import { detailedPresenterFactory } from "./detailed/detailedPresenterFactory.ts";
-import type { PresenterFactory } from "./types.ts";
+import { rdjsonPresenterFactory } from "./rdjsonPresenterFactory.ts";
 
-export async function getPresenterFactory(
+export function getPresenterFactory(
 	values: Pick<OptionsValues, "interactive" | "presenter">,
-): Promise<PresenterFactory> {
+) {
 	const presenterName = values.presenter ?? getDefaultPresenterName(values);
 
 	switch (presenterName) {
@@ -13,9 +13,8 @@ export async function getPresenterFactory(
 			return briefPresenterFactory;
 		case "detailed":
 			return detailedPresenterFactory;
-		case "github":
-			return (await import("./githubPresenterFactory.ts"))
-				.githubPresenterFactory;
+		case "rdjson":
+			return rdjsonPresenterFactory;
 		default:
 			throw new Error(`Unknown --presenter: ${presenterName}`);
 	}
@@ -24,10 +23,6 @@ export async function getPresenterFactory(
 function getDefaultPresenterName(values: Pick<OptionsValues, "interactive">) {
 	if (values.interactive) {
 		return "detailed";
-	}
-
-	if (process.env.GITHUB_ACTIONS === "true") {
-		return "github";
 	}
 
 	return "brief";

@@ -2,15 +2,22 @@ import * as path from "node:path";
 
 import { formatReport, type FileReport } from "@flint.fyi/core";
 
+import { briefPresenterFactory } from "./briefPresenterFactory.ts";
 import type { PresenterFactory, PresenterVirtualFile } from "./types.ts";
 
 export const githubPresenterFactory: PresenterFactory = {
 	about: {
 		name: "github",
 	},
-	initialize() {
+	initialize(context) {
+		const briefPresenter = briefPresenterFactory.initialize(context);
+
 		return {
-			*renderFile({ file, reports }) {
+			...briefPresenter,
+			async *renderFile(renderFileContext) {
+				yield* briefPresenter.renderFile(renderFileContext);
+
+				const { file, reports } = renderFileContext;
 				for (const report of reports) {
 					yield formatAnnotation(file, report);
 					yield "\n";
@@ -34,7 +41,7 @@ function escapeProperty(value: string) {
 function formatAnnotation(file: PresenterVirtualFile, report: FileReport) {
 	const { begin, end } = report.range;
 	const ruleId = report.about.id;
-	const message = formatAnnotationMessage(file, report);
+	const message = formatReport(report.data, report.message.primary);
 
 	const properties = [
 		`file=${escapeProperty(relativeFilePath(file.filePath))}`,
@@ -47,18 +54,7 @@ function formatAnnotation(file: PresenterVirtualFile, report: FileReport) {
 
 	properties.push(`endLine=${end.line + 1}`, `title=${escapeProperty(ruleId)}`);
 
-	return `::error ${properties.join(",")}::${escapeData(message)}`;
-}
-
-function formatAnnotationMessage(
-	file: PresenterVirtualFile,
-	report: FileReport,
-) {
-	const { begin } = report.range;
-	const ruleId = report.about.id;
-	const message = formatReport(report.data, report.message.primary);
-
-	return `${ruleId}: ${message} [${relativeFilePath(file.filePath)}:${begin.line + 1}:${begin.column + 1}]`;
+	return `::error ${properties.join(",")}::${escapeData(`${ruleId}: ${message}`)}`;
 }
 
 function relativeFilePath(filePath: string) {

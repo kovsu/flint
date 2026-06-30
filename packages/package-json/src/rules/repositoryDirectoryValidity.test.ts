@@ -25,20 +25,6 @@ ruleTester.describe(rule, {
   }
 }
 `,
-			suggestions: [
-				{
-					id: "replaceRepositoryDirectory",
-					updated: `
-{
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/flint-fyi/flint",
-    "directory": "packages/example"
-  }
-}
-`,
-				},
-			],
 		},
 		{
 			code: `
@@ -61,20 +47,6 @@ ruleTester.describe(rule, {
   }
 }
 `,
-			suggestions: [
-				{
-					id: "replaceRepositoryDirectory",
-					updated: `
-{
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/flint-fyi/flint",
-    "directory": ""
-  }
-}
-`,
-				},
-			],
 		},
 	],
 	valid: [
@@ -104,14 +76,17 @@ ruleTester.describe(rule, {
 `,
 			fileName: "packages/example/package.json",
 		},
-		`
+		{
+			code: `
 {
   "repository": {
     "type": "git",
     "url": "https://github.com/flint-fyi/flint",
-    "directory": ""
+    "directory": "packages/example"
   }
 }
 `,
+			fileName: "workspace/packages/example/package.json",
+		},
 	],
 });

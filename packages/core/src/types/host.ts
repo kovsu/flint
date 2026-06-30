@@ -2,6 +2,7 @@ import type { commonlyIgnoredGlobs } from "../host/watcher.ts";
 
 export interface LinterHost {
 	fileTypeSync(pathAbsolute: string): "directory" | "file" | undefined;
+	findRepositoryRootSync(filePathAbsolute: string): string | undefined;
 	getCurrentDirectory(): string;
 	getFileTouchTime(filePath: string): Promise<number | undefined>;
 	getFileTouchTimeSync(filePath: string): number | undefined;

@@ -12,6 +12,7 @@ import type { JsonNodeVisitors } from "./nodes.ts";
 
 export interface JsonFileServices {
 	filePath: string;
+	filePathAbsolute: string;
 	root: DocumentNode;
 	sourceText: string;
 }
@@ -33,6 +34,7 @@ export const jsonLanguage: Language<JsonNodeVisitors, JsonFileServices> =
 						about: data,
 						services: {
 							filePath: data.filePath,
+							filePathAbsolute: data.filePathAbsolute,
 							root,
 							sourceText: data.sourceText,
 						},

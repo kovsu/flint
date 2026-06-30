@@ -24,7 +24,7 @@ export default ruleCreator.createRule(jsonLanguage, {
 	setup(context) {
 		return {
 			visitors: {
-				Document(node, { filePath }) {
+				Document(node, { filePath, filePathAbsolute }) {
 					const repository = getPackagePropertyOfName(node, "repository");
 					if (repository?.value.type !== "Object") {
 						return;
@@ -40,9 +40,32 @@ export default ruleCreator.createRule(jsonLanguage, {
 						return;
 					}
 
-					const expectedDirectory = normalizeDirname(filePath);
+					const repositoryRoot =
+						context.host.findRepositoryRootSync(filePathAbsolute);
+					const repositoryDirectory = directory.value.value;
 
-					if (directory.value.value === expectedDirectory) {
+					if (!repositoryRoot) {
+						const fileDirectory = normalizeDirname(filePath);
+						if (
+							repositoryDirectory === fileDirectory ||
+							fileDirectory.endsWith(`/${repositoryDirectory}`)
+						) {
+							return;
+						}
+
+						context.report({
+							message: "mismatchedDirectory",
+							range: getNodeRange(directory.value),
+						});
+						return;
+					}
+
+					const fileDirectory = normalizeDirname(filePathAbsolute);
+					const expectedDirectory = fileDirectory.slice(
+						repositoryRoot.length + 1,
+					);
+
+					if (repositoryDirectory === expectedDirectory) {
 						return;
 					}
 

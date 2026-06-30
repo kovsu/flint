@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+import { findRootSync } from "@altano/repository-tools/findRootSync.js";
 import { glob as tinyglobby } from "tinyglobby";
 
 import { dirnameKey, normalizePath, pathKey } from "@flint.fyi/utils";
@@ -168,6 +169,10 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 				// Fall through to undefined.
 			}
 			return undefined;
+		},
+		findRepositoryRootSync(filePathAbsolute) {
+			const repositoryRoot = findRootSync(path.dirname(filePathAbsolute));
+			return repositoryRoot == null ? undefined : normalizePath(repositoryRoot);
 		},
 		getCurrentDirectory() {
 			return cwd;

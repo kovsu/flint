@@ -124,6 +124,9 @@ export function createVFSLinterHost(
 			}
 			return baseHost?.fileTypeSync(pathAbsolute);
 		},
+		findRepositoryRootSync(filePathAbsolute) {
+			return baseHost?.findRepositoryRootSync(filePathAbsolute);
+		},
 		getCurrentDirectory() {
 			return cwd;
 		},

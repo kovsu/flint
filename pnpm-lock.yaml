@@ -830,6 +830,9 @@ importers:
 
   packages/core:
     dependencies:
+      '@altano/repository-tools':
+        specifier: 2.0.1
+        version: 2.0.1
       '@flint.fyi/utils':
         specifier: workspace:^
         version: link:../utils

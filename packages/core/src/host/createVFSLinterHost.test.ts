@@ -52,9 +52,7 @@ describe(createVFSLinterHost, () => {
 	it("does not find repository roots", () => {
 		const host = createVFSLinterHost({ caseSensitive: true, cwd: "/root" });
 
-		expect(
-			host.findRepositoryRootSync("/root/workspace/package.json"),
-		).toBeUndefined();
+		expect(host.getRepositoryRoot()).toBeUndefined();
 	});
 
 	describe("stat", () => {

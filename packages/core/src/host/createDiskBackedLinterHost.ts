@@ -16,6 +16,11 @@ import { isFileSystemCaseSensitive } from "./isFileSystemCaseSensitive.ts";
 export function createDiskBackedLinterHost(cwd: string): LinterHost {
 	const caseSensitiveFS = isFileSystemCaseSensitive();
 	cwd = normalizePath(cwd);
+	const foundRepositoryRoot = findRootSync(cwd);
+	const repositoryRoot =
+		foundRepositoryRoot == null
+			? undefined
+			: normalizePath(foundRepositoryRoot);
 
 	function createWatcher(
 		normalizedWatchPath: string,
@@ -170,10 +175,6 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 			}
 			return undefined;
 		},
-		findRepositoryRootSync(filePathAbsolute) {
-			const repositoryRoot = findRootSync(path.dirname(filePathAbsolute));
-			return repositoryRoot == null ? undefined : normalizePath(repositoryRoot);
-		},
 		getCurrentDirectory() {
 			return cwd;
 		},
@@ -183,6 +184,9 @@ export function createDiskBackedLinterHost(cwd: string): LinterHost {
 		},
 		getFileTouchTimeSync(filePath) {
 			return fs.statSync(filePath).mtimeMs;
+		},
+		getRepositoryRoot() {
+			return repositoryRoot;
 		},
 		async glob(patterns, options) {
 			const entries = await tinyglobby(patterns, {

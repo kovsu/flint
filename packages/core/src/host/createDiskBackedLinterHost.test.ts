@@ -70,11 +70,27 @@ describe("createDiskBackedLinterHost", () => {
 		execFileSync("git", ["init", "--quiet"], { cwd: repositoryRoot });
 
 		const host = createDiskBackedLinterHost(repositoryRoot);
-		const filePath = path.join(packageDirectory, "package.json");
 
-		expect(host.findRepositoryRootSync(filePath)).toEqual(
-			normalizePath(repositoryRoot),
-		);
+		expect(host.getRepositoryRoot()).toEqual(normalizePath(repositoryRoot));
+	});
+
+	it("memoizes the repository root", () => {
+		const repositoryRoot = path.join(integrationRoot, "repo");
+		const packageDirectory = path.join(repositoryRoot, "packages/core");
+		fs.mkdirSync(packageDirectory, { recursive: true });
+		fs.writeFileSync(path.join(packageDirectory, "package.json"), "{}");
+		execFileSync("git", ["init", "--quiet"], { cwd: repositoryRoot });
+
+		const host = createDiskBackedLinterHost(packageDirectory);
+
+		expect(host.getRepositoryRoot()).toEqual(normalizePath(repositoryRoot));
+
+		fs.rmSync(path.join(repositoryRoot, ".git"), {
+			force: true,
+			recursive: true,
+		});
+
+		expect(host.getRepositoryRoot()).toEqual(normalizePath(repositoryRoot));
 	});
 
 	it("reads file contents", () => {

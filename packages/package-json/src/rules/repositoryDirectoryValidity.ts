@@ -40,8 +40,7 @@ export default ruleCreator.createRule(jsonLanguage, {
 						return;
 					}
 
-					const repositoryRoot =
-						context.host.findRepositoryRootSync(filePathAbsolute);
+					const repositoryRoot = context.host.getRepositoryRoot();
 					const repositoryDirectory = directory.value.value;
 
 					if (!repositoryRoot) {

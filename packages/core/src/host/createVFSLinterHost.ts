@@ -124,9 +124,6 @@ export function createVFSLinterHost(
 			}
 			return baseHost?.fileTypeSync(pathAbsolute);
 		},
-		findRepositoryRootSync(filePathAbsolute) {
-			return baseHost?.findRepositoryRootSync(filePathAbsolute);
-		},
 		getCurrentDirectory() {
 			return cwd;
 		},
@@ -137,6 +134,9 @@ export function createVFSLinterHost(
 		},
 		getFileTouchTimeSync(filePath) {
 			return fileMap.get(pathKey(filePath, caseSensitiveFS))?.touchTime;
+		},
+		getRepositoryRoot() {
+			return baseHost?.getRepositoryRoot();
 		},
 		async glob(patterns, options) {
 			const isIncluded = picomatch(patterns, { dot: true });

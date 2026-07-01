@@ -2,10 +2,10 @@ import type { commonlyIgnoredGlobs } from "../host/watcher.ts";
 
 export interface LinterHost {
 	fileTypeSync(pathAbsolute: string): "directory" | "file" | undefined;
-	findRepositoryRootSync(filePathAbsolute: string): string | undefined;
 	getCurrentDirectory(): string;
 	getFileTouchTime(filePath: string): Promise<number | undefined>;
 	getFileTouchTimeSync(filePath: string): number | undefined;
+	getRepositoryRoot(): string | undefined;
 
 	/**
 	 * Find a set of files relative to the cwd given a set of glob patterns.

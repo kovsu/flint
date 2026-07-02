@@ -24,7 +24,7 @@ export default ruleCreator.createRule(jsonLanguage, {
 	setup(context) {
 		return {
 			visitors: {
-				Document(node, { filePath, filePathAbsolute }) {
+				Document(node, { filePathAbsolute }) {
 					const repository = getPackagePropertyOfName(node, "repository");
 					if (repository?.value.type !== "Object") {
 						return;
@@ -44,7 +44,7 @@ export default ruleCreator.createRule(jsonLanguage, {
 					const repositoryDirectory = directory.value.value;
 
 					if (!repositoryRoot) {
-						const fileDirectory = normalizeDirname(filePath);
+						const fileDirectory = normalizeDirname(filePathAbsolute);
 						if (
 							repositoryDirectory === fileDirectory ||
 							fileDirectory.endsWith(`/${repositoryDirectory}`)

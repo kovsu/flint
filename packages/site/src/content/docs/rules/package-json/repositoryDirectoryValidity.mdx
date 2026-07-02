@@ -10,8 +10,8 @@ import RuleSummary from "~/components/RuleSummary.astro";
 
 <RuleSummary plugin="package-json" rule="repositoryDirectoryValidity" />
 
-The `repository.directory` property points from the repository root to the directory containing a package's `package.json`.
-This rule reports `repository.directory` string values that do not match the package's current directory.
+The `repository.directory` property should point to the location of the package's root within its repository (the directory containing its `package.json`).
+This rule reports `repository.directory` string values that do not match the package's current directory, relative to the repo root.
 
 ## Examples
 

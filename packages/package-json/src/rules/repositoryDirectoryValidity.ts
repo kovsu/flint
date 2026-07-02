@@ -16,9 +16,9 @@ export default ruleCreator.createRule(jsonLanguage, {
 			primary:
 				"The repository directory should match this package.json file's directory.",
 			secondary: [
-				"The package.json repository.directory field points from the repository root to the package's folder.",
+				"The repository.directory field points to the package's root, relative to the repository root.",
 			],
-			suggestions: ["Replace with the path to this package.json file."],
+			suggestions: ["Replace with the relative path for this package's root."],
 		},
 	},
 	setup(context) {

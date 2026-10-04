@@ -1,4 +1,4 @@
-name: Diagnose E2E on Windows
+name: Verify E2E compile cache fix
 
 on:
   pull_request: ~
@@ -6,92 +6,23 @@ on:
 permissions: {}
 
 jobs:
-  vitest:
-    name: vitest ${{ matrix.variant }} (attempt ${{ matrix.attempt }})
-    runs-on: windows-latest
+  e2e:
+    name: ${{ matrix.os }} ${{ matrix.variant }} (attempt ${{ matrix.attempt }})
+    runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        variant: [baseline, serial, no-compile-cache, no-defender]
-        attempt: [1, 2, 3, 4, 5]
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        variant: [baseline, fix]
+        attempt: [1, 2, 3, 4]
     steps:
       - uses: $/.github/actions/setup
-      - name: Runner info
-        shell: pwsh
+      - name: Revert the fix for the baseline
+        if: matrix.variant == 'baseline'
+        shell: bash
         run: |
-          "ProcessorCount: $([Environment]::ProcessorCount)"
-          Get-MpComputerStatus | Select-Object AntivirusEnabled, RealTimeProtectionEnabled | Format-List
-      - name: Disable Defender real-time monitoring
-        if: matrix.variant == 'no-defender'
-        shell: pwsh
-        run: |
-          Set-MpPreference -DisableRealtimeMonitoring $true
-          Get-MpComputerStatus | Select-Object RealTimeProtectionEnabled | Format-List
+          node -e "const fs = require('node:fs'); const file = 'packages/e2e/tests/utils.ts'; fs.writeFileSync(file, fs.readFileSync(file, 'utf8').split('\n').filter((line) => !line.includes('NODE_DISABLE_COMPILE_CACHE')).join('\n'));"
+          echo "NODE_DISABLE_COMPILE_CACHE lines left: $(grep -c NODE_DISABLE_COMPILE_CACHE packages/e2e/tests/utils.ts || true)"
       - name: Run e2e Tests
         shell: bash
-        env:
-          VARIANT: ${{ matrix.variant }}
-        run: |
-          extra_args=()
-          if [ "$VARIANT" = serial ]; then extra_args+=(--no-file-parallelism); fi
-          if [ "$VARIANT" = no-compile-cache ]; then export NODE_DISABLE_COMPILE_CACHE=1; fi
-          pnpm run test --project e2e --run --testTimeout=180000 "${extra_args[@]}"
-
-  single-process:
-    name: single-process (attempt ${{ matrix.attempt }})
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        attempt: [1, 2, 3]
-    steps:
-      - uses: $/.github/actions/setup
-      - name: Time each fixture sequentially
-        shell: bash
-        working-directory: packages/e2e/tests
-        run: |
-          for round in 1 2; do
-            for fixture in no-reports cspell typescript directives; do
-              rm -f "$fixture/node_modules/.cache/flint.json"
-              start=$(date +%s%3N)
-              (cd "$fixture" && env -u GITHUB_ACTIONS node ../../../flint/src/bin/index.ts > /dev/null) || true
-              end=$(date +%s%3N)
-              echo "sequential round=$round fixture=$fixture ms=$((end - start))" | tee -a "$GITHUB_STEP_SUMMARY"
-            done
-          done
-      - name: Time three fixtures concurrently
-        shell: bash
-        working-directory: packages/e2e/tests
-        run: |
-          for fixture in cspell typescript directives; do
-            rm -f "$fixture/node_modules/.cache/flint.json"
-            (
-              start=$(date +%s%3N)
-              (cd "$fixture" && env -u GITHUB_ACTIONS node ../../../flint/src/bin/index.ts > /dev/null) || true
-              end=$(date +%s%3N)
-              echo "concurrent fixture=$fixture ms=$((end - start))" | tee -a "$GITHUB_STEP_SUMMARY"
-            ) &
-          done
-          wait
-      - name: CPU profile each fixture sequentially
-        shell: bash
-        working-directory: packages/e2e/tests
-        run: |
-          for fixture in no-reports cspell typescript directives; do
-            rm -f "$fixture/node_modules/.cache/flint.json"
-            (cd "$fixture" && env -u GITHUB_ACTIONS node --cpu-prof --cpu-prof-dir="$GITHUB_WORKSPACE/profiles/sequential-$fixture" ../../../flint/src/bin/index.ts > /dev/null) || true
-          done
-      - name: CPU profile three fixtures concurrently
-        shell: bash
-        working-directory: packages/e2e/tests
-        run: |
-          for fixture in cspell typescript directives; do
-            rm -f "$fixture/node_modules/.cache/flint.json"
-            (cd "$fixture" && env -u GITHUB_ACTIONS node --cpu-prof --cpu-prof-dir="$GITHUB_WORKSPACE/profiles/concurrent-$fixture" ../../../flint/src/bin/index.ts > /dev/null || true) &
-          done
-          wait
-      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        if: ${{ !cancelled() }}
-        with:
-          name: cpu-profiles-attempt-${{ matrix.attempt }}
-          path: profiles
+        run: pnpm run test --project e2e --run --testTimeout=180000

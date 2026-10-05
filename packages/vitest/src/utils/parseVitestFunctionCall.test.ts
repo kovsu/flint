@@ -8,10 +8,13 @@ import { parseVitestFunctionCall } from "./parseVitestFunctionCall.ts";
 const knownVitestFunctionNames = [
 	"afterAll",
 	"afterEach",
+	"aroundAll",
+	"aroundEach",
 	"beforeAll",
 	"beforeEach",
 	"describe",
 	"it",
+	"suite",
 	"test",
 ];
 
@@ -66,6 +69,7 @@ describe(parseVitestFunctionCall, () => {
 		{ segments: ["only"], source: "test.only(() => {})" },
 		{ segments: ["runIf"], source: "test.runIf(true)" },
 		{ segments: ["sequential"], source: "test.sequential(() => {})" },
+		{ segments: ["shuffle"], source: "describe.shuffle(() => {})" },
 		{ segments: ["skip"], source: "it.skip(() => {})" },
 		{ segments: ["skipIf"], source: "it.skipIf(true)" },
 		{ segments: ["todo"], source: "describe.todo(() => {})" },

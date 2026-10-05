@@ -5,10 +5,13 @@ import type { AST } from "@flint.fyi/typescript-language";
 const knownVitestFunctionNames = [
 	"afterAll",
 	"afterEach",
+	"aroundAll",
+	"aroundEach",
 	"beforeAll",
 	"beforeEach",
 	"describe",
 	"it",
+	"suite",
 	"test",
 ] as const;
 
@@ -20,6 +23,7 @@ const knownVitestFunctionModifiersSet = new Set([
 	"only",
 	"runIf",
 	"sequential",
+	"shuffle",
 	"skip",
 	"skipIf",
 	"todo",
@@ -37,7 +41,7 @@ export function parseVitestFunctionCall(
 	const parsedCallee = parseVitestCallee(node.expression);
 
 	if (!parsedCallee || !knownBlockNamesSet.has(parsedCallee.name)) {
-		return undefined;
+		return;
 	}
 
 	switch (node.expression.kind) {

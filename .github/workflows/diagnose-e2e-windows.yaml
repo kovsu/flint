@@ -1,0 +1,100 @@
+name: Benchmark flint compile cache
+
+on:
+  pull_request: ~
+
+permissions: {}
+
+jobs:
+  benchmark:
+    name: ${{ matrix.os }} (attempt ${{ matrix.attempt }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        attempt: [1, 2]
+    steps:
+      - uses: $/.github/actions/setup
+      - name: Install hyperfine
+        shell: bash
+        env:
+          RUNNER_OS_NAME: ${{ runner.os }}
+        run: |
+          version=v1.20.0
+          case "$RUNNER_OS_NAME" in
+            Windows) target=x86_64-pc-windows-msvc; extension=zip ;;
+            Linux) target=x86_64-unknown-linux-musl; extension=tar.gz ;;
+            macOS) target=aarch64-apple-darwin; extension=tar.gz ;;
+          esac
+          archive="hyperfine-$version-$target.$extension"
+          curl -fsSL -o "$RUNNER_TEMP/$archive" "https://github.com/sharkdp/hyperfine/releases/download/$version/$archive"
+          cd "$RUNNER_TEMP"
+          if [ "$extension" = zip ]; then unzip -q "$archive"; else tar -xzf "$archive"; fi
+          echo "$RUNNER_TEMP/hyperfine-$version-$target" >> "$GITHUB_PATH"
+      - name: Write benchmark helpers
+        shell: bash
+        run: |
+          if command -v cygpath > /dev/null; then
+            bench_temp=$(cygpath -m "$RUNNER_TEMP")
+            bench_shell="'$(cygpath -m "$(command -v bash)")'"
+          else
+            bench_temp=$RUNNER_TEMP
+            bench_shell="'$(command -v bash)'"
+          fi
+          echo "BENCH_TEMP=$bench_temp" >> "$GITHUB_ENV"
+          echo "BENCH_SHELL=$bench_shell" >> "$GITHUB_ENV"
+          echo "bench temp: $bench_temp, bench shell: $bench_shell"
+          cat > "$RUNNER_TEMP/prepare.mjs" <<'EOF'
+          import fs from "node:fs";
+          import os from "node:os";
+          import path from "node:path";
+
+          const [mode, ...fixtures] = process.argv.slice(2);
+          if (mode === "cold") {
+          	fs.rmSync(path.join(os.tmpdir(), "node-compile-cache"), { force: true, recursive: true });
+          }
+          for (const fixture of fixtures) {
+          	fs.rmSync(path.join(fixture, "node_modules", ".cache", "flint.json"), { force: true });
+          }
+          EOF
+          cat > "$RUNNER_TEMP/trio.sh" <<'EOF'
+          for fixture in cspell typescript directives; do
+            (cd "$fixture" && env -u GITHUB_ACTIONS node ../../../flint/src/bin/index.ts > /dev/null) &
+          done
+          wait
+          EOF
+          node -p "'compile cache dir: ' + require('node:path').join(require('node:os').tmpdir(), 'node-compile-cache')"
+          hyperfine --version
+          mkdir -p "$RUNNER_TEMP/results"
+      - name: Benchmark one process
+        shell: bash
+        working-directory: packages/e2e/tests
+        run: |
+          flint="env -u GITHUB_ACTIONS node ../../../flint/src/bin/index.ts"
+          hyperfine --shell="$BENCH_SHELL" --ignore-failure --warmup 3 --runs 20 \
+            --export-json "$BENCH_TEMP/results/single.json" --export-markdown "$BENCH_TEMP/results/single.md" \
+            --prepare "node '$BENCH_TEMP/prepare.mjs' cold directives" -n "single cold-cache" "cd directives && $flint" \
+            --prepare "node '$BENCH_TEMP/prepare.mjs' warm directives" -n "single warm-cache" "cd directives && $flint" \
+            --prepare "node '$BENCH_TEMP/prepare.mjs' off directives" -n "single cache-off" "cd directives && NODE_DISABLE_COMPILE_CACHE=1 $flint"
+          cat "$BENCH_TEMP/results/single.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Benchmark three concurrent processes
+        shell: bash
+        working-directory: packages/e2e/tests
+        run: |
+          hyperfine --shell="$BENCH_SHELL" --ignore-failure --warmup 3 --runs 20 \
+            --export-json "$BENCH_TEMP/results/trio.json" --export-markdown "$BENCH_TEMP/results/trio.md" \
+            --prepare "node '$BENCH_TEMP/prepare.mjs' cold cspell typescript directives" -n "trio cold-cache" "bash '$BENCH_TEMP/trio.sh'" \
+            --prepare "node '$BENCH_TEMP/prepare.mjs' warm cspell typescript directives" -n "trio warm-cache" "bash '$BENCH_TEMP/trio.sh'" \
+            --prepare "node '$BENCH_TEMP/prepare.mjs' off cspell typescript directives" -n "trio cache-off" "NODE_DISABLE_COMPILE_CACHE=1 bash '$BENCH_TEMP/trio.sh'"
+          cat "$BENCH_TEMP/results/trio.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Compile cache contents
+        shell: bash
+        run: |
+          node -e "const fs = require('node:fs'); const dir = require('node:path').join(require('node:os').tmpdir(), 'node-compile-cache'); const files = fs.readdirSync(dir, { recursive: true, withFileTypes: true }).filter((entry) => entry.isFile()); console.log('files:', files.length);"
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: hyperfine-${{ matrix.os }}-attempt-${{ matrix.attempt }}
+          path: ${{ runner.temp }}/results

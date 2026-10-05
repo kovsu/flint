@@ -5,24 +5,18 @@ import {
 
 import { ruleCreator } from "../ruleCreator.ts";
 import { parseVitestFunctionCall } from "../utils/parseVitestFunctionCall.ts";
-
-const testCaseFunctionNamesSet = new Set([
-	"bench",
-	"fit",
-	"it",
-	"test",
-	"xit",
-	"xtest",
-]);
+import { testCaseFunctionNamesSet } from "../utils/testCaseFunctions.ts";
 
 const hookFunctionNamesSet = new Set([
 	"afterAll",
 	"afterEach",
+	"aroundAll",
+	"aroundEach",
 	"beforeAll",
 	"beforeEach",
 ]);
 
-const exemptModifiers = ["extend", "scoped"];
+const exemptModifiers = new Set(["extend", "scoped"]);
 
 export default ruleCreator.createRule(typescriptLanguage, {
 	about: {
@@ -56,7 +50,7 @@ export default ruleCreator.createRule(typescriptLanguage, {
 					const { name, segments, targetNode } = vitestFunction;
 
 					const hasExemptModifier = segments.some((segment) =>
-						exemptModifiers.includes(segment),
+						exemptModifiers.has(segment),
 					);
 
 					if (testCaseFunctionNamesSet.has(name) && !hasExemptModifier) {
